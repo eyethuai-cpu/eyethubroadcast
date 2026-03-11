@@ -357,7 +357,10 @@ input[type=number].sched-input { width:54px; text-align:center; }
 <body>
 
 <header>
-  <h1>🎙 EYETHU <span>PRO</span> RADIO STUDIO</h1>
+  <h1 style="display:flex;align-items:center;gap:10px;">
+    <img src="/icons/app-icon.png" alt="" style="width:36px;height:36px;border-radius:8px;flex-shrink:0;">
+    EYETHU <span>PRO</span> RADIO STUDIO
+  </h1>
   <div style="display:flex;align-items:center;gap:10px;">
     <div id="headerClock" style="font-family:'Orbitron',monospace;font-size:.68rem;color:var(--gd);letter-spacing:.08em;"></div>
     <div id="onAirBadge">⚪ OFF AIR</div>
@@ -508,6 +511,10 @@ input[type=number].sched-input { width:54px; text-align:center; }
       <div id="clockDisplay">--:--:--</div>
       <div id="dateDisplay"></div>
       <div id="adjDisplay">AUTO-DJ: ON — STANDBY</div>
+      <div style="display:flex;justify-content:center;margin-top:10px;">
+        <img src="/icons/app-icon.png" alt="Eyethu Pro Radio Studio"
+             style="width:100%;max-width:160px;border-radius:22px;box-shadow:0 0 18px rgba(77,255,124,0.25);display:block;">
+      </div>
     </div>
 
   </div>
@@ -541,38 +548,19 @@ input[type=number].sched-input { width:54px; text-align:center; }
     <!-- DSP -->
     <div class="panel">
       <div class="panel-title">⚙️ Broadcast DSP Chain</div>
-      <div style="font-size:.42rem;color:#2a4028;margin-bottom:6px;">BASS → STEREO → EXCITER → SOFT CLIP → LIMITER</div>
-      <div class="fader-row">
-        <span class="fader-label">BASS</span>
-        <input type="range" id="dspBass" min="-12" max="12" step="1" value="0">
-        <span class="fader-val" id="dspBassd">0</span>
+      <div style="font-size:.52rem;color:var(--gd);margin-bottom:8px;letter-spacing:.04em;">● FM PROCESSOR — ALWAYS ON</div>
+      <div style="font-size:.48rem;color:var(--tx-mid);line-height:1.7;">
+        <div>🎚 LOUDNESS NORMALIZER  <span style="color:var(--gd)">−14 LUFS</span></div>
+        <div>🎛 HIGH PASS  <span style="color:var(--gd)">40 Hz</span></div>
+        <div>🎛 AGC  <span style="color:var(--gd)">−18 dB / 2:1</span></div>
+        <div>🎛 5-BAND MULTIBAND COMP</div>
+        <div>🎛 STEREO WIDENER</div>
+        <div>🎛 HARMONIC EXCITER</div>
+        <div>🎛 BASS ENHANCER  <span style="color:var(--gd)">90 Hz +1.5 dB</span></div>
+        <div>🎛 SOFT CLIPPER  <span style="color:var(--gd)">tanh</span></div>
+        <div>🎛 BRICKWALL LIMITER  <span style="color:var(--gd)">−2 dB</span></div>
       </div>
-      <div class="fader-row">
-        <span class="fader-label">MID</span>
-        <input type="range" id="dspMid" min="-12" max="12" step="1" value="0">
-        <span class="fader-val" id="dspMidd">0</span>
-      </div>
-      <div class="fader-row">
-        <span class="fader-label">TREBLE</span>
-        <input type="range" id="dspTreb" min="-12" max="12" step="1" value="0">
-        <span class="fader-val" id="dspTrebd">0</span>
-      </div>
-      <div class="fader-row">
-        <span class="fader-label">COMP</span>
-        <input type="range" id="dspComp" min="-40" max="0" step="1" value="-18">
-        <span class="fader-val" id="dspCompd">-18</span>
-      </div>
-      <div class="fader-row">
-        <span class="fader-label">CLIP AMT</span>
-        <input type="range" id="dspClipAmt" min="10" max="400" step="10" value="200">
-        <span class="fader-val" id="dspClipAmtd">200</span>
-      </div>
-      <div class="fader-row">
-        <span class="fader-label">LIMIT THR</span>
-        <input type="range" id="dspLimitThr" min="-20" max="0" step="1" value="-3">
-        <span class="fader-val" id="dspLimitThrd">-3dB</span>
-      </div>
-      <div class="pills" id="pillRow"></div>
+      <div class="pills" id="pillRow" style="display:none"></div>
     </div>
 
   </div>
@@ -1962,15 +1950,18 @@ function initACX() {
     d.audio.crossOrigin = 'anonymous';
     try {
       var src  = ACX.createMediaElementSource(d.audio);
+      // Route through FM-style broadcast chain
+      var processed = createBroadcastChain(src);
+      // Analyser tapped after the full DSP chain for accurate VU metering
       var anal = ACX.createAnalyser();
       anal.fftSize = 1024;
       anal.smoothingTimeConstant = 0.75;
-      src.connect(anal);
+      processed.connect(anal);
       anal.connect(id === 'A' ? xfGainA : xfGainB);
       d.srcNode  = src;
       d.analNode = anal;
     } catch(e) {
-      console.warn('Deck ' + id + ' analyser error:', e);
+      console.warn('Deck ' + id + ' chain error:', e);
     }
   });
 
@@ -2306,167 +2297,155 @@ ge('micVol').addEventListener('input', function() {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  DSP CHAIN  — True bypass architecture
+//  BROADCAST DSP CHAIN  — FM-style processor
 //
-//  DEFAULT (all off):  srcNode → analNode → xfGain   (zero processing)
-//  When pills enabled: srcNode → [only active nodes] → analNode → xfGain
+//  Each deck source is routed:
+//    srcNode → createBroadcastChain() → analNode → xfGain → micDuckGain → ...
 //
-//  Rules:
-//  - Nodes are only wired INTO the path when their pill is ON
-//  - When a pill turns OFF the whole chain is rewired from scratch
-//  - DynamicsCompressor and WaveShaper are NEVER left in path at "bypass" settings
-//    because they process even at ratio=1 / straight curve
+//  createBroadcastChain(source) builds:
+//    source → analyser/normalizer → preGain → highpass → AGC →
+//    5-band multiband compressor → stereo widener →
+//    exciter → bass enhancer → soft clipper → brickwall limiter → masterGain (returned)
 // ─────────────────────────────────────────────────────────────────────────────
-var eqNodes = {
-  A: { bass: null, mid: null, treb: null, comp: null, clip: null, limit: null, limitTrim: null },
-  B: { bass: null, mid: null, treb: null, comp: null, clip: null, limit: null, limitTrim: null }
-};
 
-function makeSoftClipCurve(amount) {
-  var n = 256, curve = new Float32Array(n);
-  for (var i = 0; i < n; i++) {
-    var x = (i * 2) / n - 1;
-    curve[i] = (Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
+function createBroadcastChain(source) {
+
+  // LOUDNESS NORMALIZER
+  var analyser = ACX.createAnalyser();
+  analyser.fftSize = 2048;
+  var normalizer = ACX.createGain();
+  normalizer.gain.value = 1;
+  source.connect(analyser);
+  analyser.connect(normalizer);
+  var normData = new Float32Array(analyser.fftSize);
+  function normalize() {
+    analyser.getFloatTimeDomainData(normData);
+    var sum = 0;
+    for (var i = 0; i < normData.length; i++) sum += normData[i] * normData[i];
+    var rms = Math.sqrt(sum / normData.length);
+    if (rms > 0.00001) {
+      var db   = 20 * Math.log10(rms);
+      var diff = -14 - db;
+      var gain = Math.pow(10, diff / 20);
+      normalizer.gain.value = Math.min(3, Math.max(0.3, gain));
+    }
+    requestAnimationFrame(normalize);
   }
-  return curve;
+  normalize();
+
+  // PRE GAIN
+  var preGain = ACX.createGain();
+  preGain.gain.value = 0.65;
+
+  // HIGH PASS FILTER
+  var highpass = ACX.createBiquadFilter();
+  highpass.type = 'highpass';
+  highpass.frequency.value = 40;
+
+  // AGC
+  var agc = ACX.createDynamicsCompressor();
+  agc.threshold.value = -18;
+  agc.ratio.value     = 2;
+  agc.attack.value    = 0.01;
+  agc.release.value   = 0.3;
+
+  // MULTIBAND FILTERS
+  var band1 = ACX.createBiquadFilter(); band1.type = 'lowpass';  band1.frequency.value = 120;
+  var band2 = ACX.createBiquadFilter(); band2.type = 'bandpass'; band2.frequency.value = 300;  band2.Q.value = 0.7;
+  var band3 = ACX.createBiquadFilter(); band3.type = 'bandpass'; band3.frequency.value = 1200; band3.Q.value = 0.7;
+  var band4 = ACX.createBiquadFilter(); band4.type = 'bandpass'; band4.frequency.value = 3500; band4.Q.value = 0.7;
+  var band5 = ACX.createBiquadFilter(); band5.type = 'highpass'; band5.frequency.value = 6000;
+
+  // PER-BAND COMPRESSORS
+  function makeComp(thr, ratio) {
+    var c = ACX.createDynamicsCompressor();
+    c.threshold.value = thr; c.ratio.value = ratio;
+    c.attack.value = 0.003; c.release.value = 0.2;
+    return c;
+  }
+  var comp1 = makeComp(-28, 3);
+  var comp2 = makeComp(-26, 3);
+  var comp3 = makeComp(-24, 2.5);
+  var comp4 = makeComp(-22, 2);
+  var comp5 = makeComp(-20, 2);
+
+  // MERGE BUS
+  var merge = ACX.createGain();
+
+  // STEREO WIDENER
+  var splitter  = ACX.createChannelSplitter(2);
+  var merger    = ACX.createChannelMerger(2);
+  var leftGain  = ACX.createGain(); leftGain.gain.value  = 1.05;
+  var rightGain = ACX.createGain(); rightGain.gain.value = 1.05;
+
+  // EXCITER
+  var exciter = ACX.createWaveShaper();
+  var excCurve = new Float32Array(1024);
+  for (var i = 0; i < 1024; i++) {
+    var x = i * 2 / 1023 - 1;
+    excCurve[i] = x + (0.03 * Math.sin(Math.PI * x));
+  }
+  exciter.curve = excCurve;
+  exciter.oversample = '4x';
+
+  // BASS ENHANCER
+  var bass = ACX.createBiquadFilter();
+  bass.type = 'lowshelf'; bass.frequency.value = 90; bass.gain.value = 1.5;
+
+  // SOFT CLIPPER
+  var clipper = ACX.createWaveShaper();
+  var clipCurve = new Float32Array(1024);
+  for (var j = 0; j < 1024; j++) {
+    var y = j * 2 / 1023 - 1;
+    clipCurve[j] = Math.tanh(y);
+  }
+  clipper.curve = clipCurve;
+  clipper.oversample = '4x';
+
+  // BRICKWALL LIMITER
+  var limiter = ACX.createDynamicsCompressor();
+  limiter.threshold.value = -2;
+  limiter.ratio.value     = 20;
+  limiter.attack.value    = 0.001;
+  limiter.release.value   = 0.05;
+
+  // MASTER BUS OUTPUT
+  var chainMaster = ACX.createGain();
+  chainMaster.gain.value = 1;
+
+  // CONNECTIONS
+  normalizer.connect(preGain);
+  preGain.connect(highpass);
+  highpass.connect(agc);
+
+  agc.connect(band1); agc.connect(band2); agc.connect(band3);
+  agc.connect(band4); agc.connect(band5);
+
+  band1.connect(comp1); band2.connect(comp2); band3.connect(comp3);
+  band4.connect(comp4); band5.connect(comp5);
+
+  comp1.connect(merge); comp2.connect(merge); comp3.connect(merge);
+  comp4.connect(merge); comp5.connect(merge);
+
+  merge.connect(splitter);
+  splitter.connect(leftGain, 0);
+  splitter.connect(rightGain, 1);
+  leftGain.connect(merger, 0, 0);
+  rightGain.connect(merger, 0, 1);
+
+  merger.connect(exciter);
+  exciter.connect(bass);
+  bass.connect(clipper);
+  clipper.connect(limiter);
+  limiter.connect(chainMaster);
+
+  return chainMaster;
 }
 
-// Lazily create nodes for a deck — only called when first needed
-function ensureEQNodes(id) {
-  if (!ACX) return false;
-  var eq = eqNodes[id];
-  if (!eq.bass) {
-    eq.bass = ACX.createBiquadFilter();
-    eq.bass.type = 'lowShelf'; eq.bass.frequency.value = 200;
-
-    eq.mid = ACX.createBiquadFilter();
-    eq.mid.type = 'peaking'; eq.mid.frequency.value = 1000; eq.mid.Q.value = 0.8;
-
-    eq.treb = ACX.createBiquadFilter();
-    eq.treb.type = 'highShelf'; eq.treb.frequency.value = 4000;
-
-    eq.comp = ACX.createDynamicsCompressor();
-    eq.comp.knee.value = 8; eq.comp.attack.value = 0.01; eq.comp.release.value = 0.25;
-
-    eq.clip = ACX.createWaveShaper();
-    eq.clip.oversample = 'none'; // NO oversampling — avoids resampling artifacts
-
-    eq.limit = ACX.createDynamicsCompressor();
-    // True brick wall: zero knee, fastest attack, high ratio
-    eq.limit.knee.value      = 0;
-    eq.limit.attack.value    = 0.001;  // 1ms attack — catches transients
-    eq.limit.release.value   = 0.1;    // 100ms release
-    eq.limit.ratio.value     = 20;     // near-brick-wall
-    // limitTrim: compensates for the compressor's internal automatic makeup gain
-    // DynamicsCompressor always applies makeup — we subtract it back so the
-    // limiter REDUCES peaks rather than boosting them
-    eq.limitTrim = ACX.createGain();
-    eq.limitTrim.gain.value = 0.89; // ~-1dB trim to counteract makeup
-  }
-  return true;
-}
-
-// Rewire the entire chain for one deck based on current dspEnabled state.
-// Called every time any pill toggles or slider changes.
-function rewireChain(id) {
-  if (!ACX) return;
-  var d  = decks[id];
-  var eq = eqNodes[id];
-  if (!d.srcNode || !d.analNode) return;
-
-  // 1. Disconnect everything to start clean
-  var allNodes = [d.srcNode, d.analNode];
-  if (eq.bass)  allNodes.push(eq.bass, eq.mid, eq.treb);
-  if (eq.comp)  allNodes.push(eq.comp);
-  if (eq.clip)  allNodes.push(eq.clip);
-  if (eq.limit)     allNodes.push(eq.limit);
-  if (eq.limitTrim) allNodes.push(eq.limitTrim);
-
-  allNodes.forEach(function(n) {
-    try { n.disconnect(); } catch(e) {}
-  });
-
-  // 2. Build the active chain — only nodes whose pill is ON
-  var chain = [d.srcNode];
-
-  if (dspEnabled.bass || dspEnabled.mid || dspEnabled.treb) {
-    ensureEQNodes(id);
-    // Update values before inserting
-    eq.bass.gain.value = dspEnabled.bass ? +ge('dspBass').value : 0;
-    eq.mid.gain.value  = dspEnabled.mid  ? +ge('dspMid').value  : 0;
-    eq.treb.gain.value = dspEnabled.treb ? +ge('dspTreb').value : 0;
-    chain.push(eq.bass, eq.mid, eq.treb);
-  }
-
-  if (dspEnabled.comp) {
-    ensureEQNodes(id);
-    eq.comp.threshold.value = +ge('dspComp').value;
-    eq.comp.ratio.value     = 4;
-    chain.push(eq.comp);
-  }
-
-  if (dspEnabled.clip) {
-    ensureEQNodes(id);
-    eq.clip.curve = makeSoftClipCurve(+ge('dspClipAmt').value);
-    chain.push(eq.clip);
-  }
-
-  if (dspEnabled.limit) {
-    ensureEQNodes(id);
-    var limitThr = +ge('dspLimitThr').value;
-    eq.limit.threshold.value = limitThr;
-    eq.limit.ratio.value     = 20;    // brick wall
-    eq.limit.knee.value      = 0;
-    eq.limit.attack.value    = 0.001;
-    eq.limit.release.value   = 0.1;
-    // Trim gain counteracts Web Audio's built-in makeup gain:
-    // At high ratios the makeup is approximately -threshold/ratio, roughly 1-2dB.
-    // We set a fixed -1.5dB trim which keeps output below input at all threshold values.
-    eq.limitTrim.gain.value  = 0.84;  // -1.5dB — limiter NEVER raises volume
-    chain.push(eq.limit, eq.limitTrim);
-  }
-
-  chain.push(d.analNode);
-
-  // 3. Wire chain links in order
-  for (var i = 0; i < chain.length - 1; i++) {
-    chain[i].connect(chain[i + 1]);
-  }
-
-  // 4. analNode must reconnect to its xfGain output
-  d.analNode.connect(id === 'A' ? xfGainA : xfGainB);
-}
-
-function applyDSP() {
-  ['A', 'B'].forEach(function(id) { rewireChain(id); });
-}
-
-ge('dspBass').addEventListener('input', function() { setSlider('dspBass','dspBassd',sgn); applyDSP(); });
-ge('dspMid').addEventListener('input',  function() { setSlider('dspMid','dspMidd',sgn);   applyDSP(); });
-ge('dspTreb').addEventListener('input', function() { setSlider('dspTreb','dspTrebd',sgn); applyDSP(); });
-ge('dspComp').addEventListener('input', function() { setSlider('dspComp','dspCompd',function(v){return v;}); applyDSP(); });
-ge('dspClipAmt').addEventListener('input', function() { setSlider('dspClipAmt','dspClipAmtd',function(v){return v;}); applyDSP(); });
-ge('dspLimitThr').addEventListener('input', function() { setSlider('dspLimitThr','dspLimitThrd',function(v){return v+'dB';}); applyDSP(); });
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  DSP PILLS
-// ─────────────────────────────────────────────────────────────────────────────
+// buildPills is a no-op now — pill row kept for settings compat but hidden
 function buildPills() {
   var row = ge('pillRow');
-  row.innerHTML = '';
-  pillDefs.forEach(function(p) {
-    var span = document.createElement('span');
-    span.className = 'pill' + (dspEnabled[p.key] ? ' on' : '');
-    span.textContent = p.label;
-    span.addEventListener('click', function() {
-      dspEnabled[p.key] = !dspEnabled[p.key];
-      span.classList.toggle('on', dspEnabled[p.key]);
-      applyDSP();
-      saveSettings();
-      toast(p.label + ': ' + (dspEnabled[p.key] ? 'ON' : 'OFF'));
-    });
-    row.appendChild(span);
-  });
+  if (row) row.innerHTML = '';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2526,35 +2505,61 @@ function setupMic() {
 
       var src = ACX.createMediaStreamSource(stream);
 
-      // ── OUTPUT PATH: src → micGain → (masterGain when live) ──────────────
+      // ── MIC DSP CHAIN (completely independent from deck broadcast chain) ──
+      // src → gate → micComp → micEQ → micGain → micAnal → (masterGain when live)
+
+      // Noise gate — suppresses background when mic is quiet
+      var micGate = ACX.createDynamicsCompressor();
+      micGate.threshold.value = -50;
+      micGate.ratio.value     = 1;
+      micGate.attack.value    = 0.01;
+      micGate.release.value   = 0.2;
+
+      // Voice compressor — tightens dynamics for broadcast presence
+      var micComp = ACX.createDynamicsCompressor();
+      micComp.threshold.value = -18;
+      micComp.ratio.value     = 3;
+      micComp.attack.value    = 0.003;
+      micComp.release.value   = 0.2;
+
+      // Presence boost EQ — adds clarity/air to voice at 3kHz
+      var micEQ = ACX.createBiquadFilter();
+      micEQ.type            = 'peaking';
+      micEQ.frequency.value = 3000;
+      micEQ.gain.value      = 2;
+      micEQ.Q.value         = 1;
+
+      // Output gain — controlled by MIC VOL slider
       micGain = ACX.createGain();
       micGain.gain.value = +ge('micVol').value;
-      // micGain does NOT connect to masterGain here — only connects on MIC ON
 
-      // ── VU METER ANALYSER: on the output path after gain ─────────────────
+      // Wire mic DSP chain
+      src.connect(micGate);
+      micGate.connect(micComp);
+      micComp.connect(micEQ);
+      micEQ.connect(micGain);
+
+      // ── VU METER ANALYSER — after DSP chain ──────────────────────────────
       micAnal = ACX.createAnalyser();
       micAnal.fftSize = 256;
       micAnal.smoothingTimeConstant = 0.6;
-      src.connect(micGain);
-      // micGain → micAnal (so VU meter works)
-      // micAnal → masterGain only when mic is ON (see toggleMic)
       micGain.connect(micAnal);
+      // micAnal → masterGain only when MIC ON (see toggleMic)
 
-      // ── SPEECH DETECTION PATH: completely isolated, no output connection ──
-      // src → micHPF → micDetect
-      // This path NEVER connects to masterGain — zero feedback risk
+      // ── SPEECH DETECTION PATH — completely isolated, never touches output ─
+      // Raw source only — bypasses DSP so gate doesn't suppress detection
       micHPF = ACX.createBiquadFilter();
-      micHPF.type = 'highpass';
-      micHPF.frequency.value = 120;  // cut DC offset, mains hum, low rumble
-      micHPF.Q.value = 0.7;
+      micHPF.type            = 'highpass';
+      micHPF.frequency.value = 120;
+      micHPF.Q.value         = 0.7;
 
       micDetect = ACX.createAnalyser();
       micDetect.fftSize = 2048;
-      micDetect.smoothingTimeConstant = 0;  // raw — no smoothing lag
+      micDetect.smoothingTimeConstant = 0;
 
       src.connect(micHPF);
       micHPF.connect(micDetect);
-      // micDetect deliberately NOT connected to anything — detection only
+      // micDetect deliberately NOT connected to any output — detection only
 
       // Ensure music volume is fully restored — never start ducked
       hardResetMicDuck();
@@ -2982,11 +2987,7 @@ setInterval(tickClock, 1000); tickClock();
   ['rateA','rateAd',function(v){return v.toFixed(2)+'x';}],
   ['rateB','rateBd',function(v){return v.toFixed(2)+'x';}],
   ['micVol','micVold',pct], ['masterVol','masterVold',pct],
-  ['dspBass','dspBassd',sgn], ['dspMid','dspMidd',sgn],
-  ['dspTreb','dspTrebd',sgn], ['dspComp','dspCompd',function(v){return v;}],
-  ['crossfader',null,null],
-  ['dspClipAmt','dspClipAmtd',function(v){return v;}],
-  ['dspLimitThr','dspLimitThrd',function(v){return v+'dB';}]
+  ['crossfader',null,null]
 ].forEach(function(row) { setSlider(row[0], row[1], row[2]); });
 
 
@@ -3072,13 +3073,6 @@ function saveSettings() {
     micVol:       ge('micVol').value,
     crossfader:   ge('crossfader').value,
     autoDJOn:     autoDJOn,
-    dspEnabled:   JSON.stringify(dspEnabled),
-    dspBass:      ge('dspBass').value,
-    dspMid:       ge('dspMid').value,
-    dspTreb:      ge('dspTreb').value,
-    dspComp:      ge('dspComp').value,
-    dspClipAmt:   ge('dspClipAmt').value,
-    dspLimitThr:  ge('dspLimitThr').value,
     cartNames:    JSON.stringify(cartNames),
     cartEmoji:    JSON.stringify(cartEmoji)
   };
@@ -3106,30 +3100,8 @@ function restoreSettings() {
    ['rateA','rateAd',function(v){return v.toFixed(2)+'x';}],
    ['rateB','rateBd',function(v){return v.toFixed(2)+'x';}],
    ['micVol','micVold',pct],['masterVol','masterVold',pct],
-   ['dspBass','dspBassd',sgn],['dspMid','dspMidd',sgn],
-   ['dspTreb','dspTrebd',sgn],['dspComp','dspCompd',function(v){return v;}],
-   ['crossfader',null,null],
-   ['dspClipAmt','dspClipAmtd',function(v){return v;}],
-   ['dspLimitThr','dspLimitThrd',function(v){return v+'dB';}]
+   ['crossfader',null,null]
   ].forEach(function(r){setSlider(r[0],r[1],r[2]);});
-
-  // DSP sliders
-  setV('dspBass',     s.dspBass);
-  setV('dspMid',      s.dspMid);
-  setV('dspTreb',     s.dspTreb);
-  setV('dspComp',     s.dspComp);
-  setV('dspClipAmt',  s.dspClipAmt);
-  setV('dspLimitThr', s.dspLimitThr);
-
-  // DSP pills
-  if (s.dspEnabled) {
-    try {
-      var de = JSON.parse(s.dspEnabled);
-      Object.keys(de).forEach(function(k){ dspEnabled[k] = !!de[k]; });
-    } catch(e) {}
-  }
-
-  // Auto-DJ
   if (s.autoDJOn != null) {
     autoDJOn = !!s.autoDJOn;
     var btn = ge('btnAutoDJ');
@@ -3150,11 +3122,7 @@ function restoreSettings() {
    ['rateA','rateAd',function(v){return v.toFixed(2)+'x';}],
    ['rateB','rateBd',function(v){return v.toFixed(2)+'x';}],
    ['micVol','micVold',pct],['masterVol','masterVold',pct],
-   ['dspBass','dspBassd',sgn],['dspMid','dspMidd',sgn],
-   ['dspTreb','dspTrebd',sgn],['dspComp','dspCompd',function(v){return v;}],
-   ['crossfader',null,null],
-   ['dspClipAmt','dspClipAmtd',function(v){return v;}],
-   ['dspLimitThr','dspLimitThrd',function(v){return v+'dB';}]
+   ['crossfader',null,null]
   ].forEach(function(r){setSlider(r[0],r[1],r[2]);});
 }
 
@@ -3260,8 +3228,7 @@ function hookSaveSettings() {
     saveT = setTimeout(saveSettings, 400);
   }
   // All sliders — save on both input (dragging) and change (release)
-  ['volA','volB','rateA','rateB','masterVol','micVol','crossfader',
-   'dspBass','dspMid','dspTreb','dspComp','dspClipAmt','dspLimitThr'
+  ['volA','volB','rateA','rateB','masterVol','micVol','crossfader'
   ].forEach(function(id) {
     var el = ge(id);
     if (el) {
