@@ -1,0 +1,3388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eyethu Pro Radio Studio</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144x144.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Eyethu Radio">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Eyethu Radio">
+<meta name="theme-color" content="#0f2d3d">
+<meta name="msapplication-TileColor" content="#07090a">
+<meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+<meta name="description" content="Professional broadcast radio studio — decks, mixer, cartwall, auto-DJ, mic and DSP.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap');
+:root {
+  /* Softer green — desaturated and dimmed, easy on eyes */
+  --g:  #4dff7c;      /* main accent: soft mint green, not nuclear */
+  --gd: #2eb85c;      /* secondary: medium green */
+  --gx: rgba(77,255,124,.07);
+  /* Backgrounds — slightly warmer dark, less pure-black */
+  --bg:  #0d0f0e;
+  --bg2: #111614;
+  --bg3: #161c18;
+  --bd:  #1e2a22;
+  /* Status colours — all toned down */
+  --red: #f05050;
+  --amb: #e8a020;
+  --blu: #3ab0e8;
+  /* Text colours — readable greys with slight green tint */
+  --tx-bright: #c8d8cc;   /* bright text */
+  --tx-mid:    #8aa090;   /* mid-level labels */
+  --tx-dim:    #566860;   /* secondary info — still readable */
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Share Tech Mono', monospace; background: var(--bg); color: var(--tx-bright); min-height: 100vh; font-size: 13px; }
+/* Subtle scanline — much lighter than before */
+body::after { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.025) 3px,rgba(0,0,0,.025) 4px); pointer-events:none; z-index:9999; }
+
+/* HEADER */
+header { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; background:#0f1311; border-bottom:1px solid var(--bd); position:sticky; top:0; z-index:100; flex-wrap:wrap; gap:8px; }
+h1 { font-family:'Orbitron',monospace; font-size:.95rem; font-weight:900; letter-spacing:.15em; color:var(--g); text-shadow:0 0 14px rgba(77,255,124,.3); }
+h1 span { color:var(--gd); font-weight:400; }
+#onAirBadge { font-family:'Orbitron',monospace; font-size:.65rem; letter-spacing:.15em; padding:6px 14px; border:1px solid #2a3a2a; color:var(--tx-dim); border-radius:2px; transition:.3s; }
+#onAirBadge.live { color:var(--red); border-color:var(--red); animation:blink 1s infinite; }
+@keyframes blink { 50%{opacity:.45} }
+
+/* LAYOUT */
+.studio { display:grid; grid-template-columns:1fr 1fr 240px; grid-template-rows:auto auto auto; gap:1px; background:var(--bd); margin:8px; }
+.panel { background:var(--bg2); padding:12px; }
+.panel-title { font-family:'Orbitron',monospace; font-size:.62rem; letter-spacing:.14em; color:var(--gd); text-transform:uppercase; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid var(--bd); }
+
+/* SIDEBAR */
+.sidebar { grid-column:3; grid-row:1/4; display:flex; flex-direction:column; gap:1px; background:var(--bd); }
+
+/* BUTTONS */
+button { font-family:'Share Tech Mono',monospace; font-size:.68rem; letter-spacing:.05em; background:var(--bg3); color:var(--tx-bright); border:1px solid var(--bd); padding:5px 10px; cursor:pointer; transition:.12s; text-transform:uppercase; border-radius:1px; }
+button:hover { background:var(--gd); color:#0d0f0e; border-color:var(--gd); }
+button:active { transform:scale(.97); }
+.b-load { border-color:var(--bd); color:var(--tx-mid); }
+.b-play { border-color:var(--g); color:var(--g); font-size:.7rem; padding:7px 14px; }
+.b-play.on { background:var(--gd); color:#0d0f0e; border-color:var(--gd); }
+.b-stop { border-color:var(--bd); color:var(--tx-dim); }
+.b-stop:hover { background:var(--bd); color:var(--tx-bright); }
+.b-cue  { border-color:#1a3050; color:#5090b8; font-size:.62rem; }
+.b-cue:hover { background:#1a3050; color:var(--tx-bright); }
+.b-eject { border-color:#2a1a0a; color:#886622; font-size:.75rem; padding:3px 8px; }
+.b-eject:hover { border-color:var(--amb); color:var(--amb); background:rgba(232,160,32,.1); }
+
+/* Library per-track remove button */
+.lib-rm-btn { flex-shrink:0; font-size:.42rem; padding:1px 4px; border-color:#2a1010; color:#663030; margin-left:2px; line-height:1.4; background:transparent; }
+.lib-rm-btn:hover { border-color:var(--red); color:var(--red); background:rgba(240,80,80,.1); }
+
+/* Queue per-item layout + remove button */
+#queueList li { display:flex; align-items:center; gap:4px; padding-right:2px; }
+.q-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.q-rm-btn { flex-shrink:0; font-size:.42rem; padding:1px 4px; border-color:#2a1010; color:#663030; line-height:1.4; background:transparent; }
+.q-rm-btn:hover { border-color:var(--red); color:var(--red); background:rgba(240,80,80,.1); }
+
+/* DECK */
+.deck-info { display:flex; align-items:flex-start; gap:8px; margin-bottom:8px; }
+.deck-letter { font-family:'Orbitron',monospace; font-size:2rem; font-weight:900; line-height:1; flex-shrink:0; }
+.track-name { font-size:.72rem; color:var(--tx-bright); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:3px; }
+.track-time { font-size:.64rem; color:var(--gd); letter-spacing:.04em; }
+
+/* WAVEFORM */
+.waveform { height:34px; background:#090c0a; border:1px solid var(--bd); position:relative; overflow:hidden; cursor:crosshair; margin-bottom:6px; }
+.wf-canvas { position:absolute; inset:0; width:100%; height:100%; }
+.wf-head { position:absolute; top:0; bottom:0; width:1px; background:rgba(255,255,255,.6); pointer-events:none; }
+
+/* PROGRESS */
+.progress-wrap { height:5px; background:#0d120e; border:1px solid var(--bd); border-radius:1px; cursor:pointer; margin-bottom:8px; position:relative; }
+.progress-fill { height:100%; background:var(--gd); width:0; border-radius:1px; pointer-events:none; }
+
+/* TRANSPORT */
+.transport { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px; }
+
+/* FADER */
+.fader-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+.fader-label { font-size:.62rem; color:var(--tx-mid); width:46px; text-align:right; flex-shrink:0; }
+.fader-val   { font-size:.64rem; color:var(--g); width:32px; text-align:right; flex-shrink:0; }
+input[type=range] { -webkit-appearance:none; appearance:none; flex:1; height:3px; background:linear-gradient(90deg,var(--gd) var(--v,80%),var(--bd) var(--v,80%)); cursor:pointer; outline:none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:10px; height:17px; background:var(--g); border-radius:1px; box-shadow:0 0 4px rgba(77,255,124,.4); }
+input[type=range]::-moz-range-thumb { width:10px; height:17px; background:var(--g); border:none; border-radius:1px; }
+
+/* VU */
+.vu-label { font-size:.58rem; color:var(--tx-dim); margin-bottom:2px; }
+canvas.vu { display:block; background:#090c0a; border:1px solid var(--bd); width:100%; height:10px; }
+.vu-scale { display:flex; justify-content:space-between; font-size:.5rem; color:var(--tx-dim); margin-top:2px; }
+
+/* QUEUE */
+.queue-list { list-style:none; max-height:140px; overflow-y:auto; margin-bottom:6px; }
+.queue-list li { padding:5px 7px; font-size:.64rem; color:var(--tx-mid); border-bottom:1px solid var(--bd); cursor:pointer; display:flex; align-items:center; gap:4px; }
+.queue-list li:hover { background:var(--gx); color:var(--g); }
+.queue-list li.active { color:var(--g); }
+.queue-list li::before { content:'◈'; color:var(--gd); font-size:.5rem; flex-shrink:0; }
+.queue-list li.active::before { content:'▶'; }
+.q-empty { font-size:.62rem; color:var(--tx-dim); padding:8px; font-style:italic; }
+
+/* CART */
+.cart-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px; }
+.cart-item { display:flex; flex-direction:column; gap:2px; }
+.cart-play-btn { padding:7px 3px; font-size:.62rem; border-color:#3a2a00; color:var(--amb); line-height:1.3; min-height:38px; text-align:center; }
+.cart-play-btn:hover { background:#3a2a00; color:var(--amb); }
+.cart-play-btn.on { background:rgba(232,160,32,.14); border-color:var(--amb); }
+.cart-file-btn { padding:3px; font-size:.58rem; border-color:var(--bd); color:var(--tx-dim); }
+.cart-file-btn:hover { background:var(--bd); color:var(--tx-bright); }
+
+/* STREAMING */
+.stream-dot { width:7px; height:7px; border-radius:50%; background:#1e2a22; display:inline-block; margin-right:5px; transition:.3s; }
+.stream-dot.live { background:var(--red); box-shadow:0 0 6px var(--red); animation:blink 1s infinite; }
+.stream-btns { display:flex; gap:4px; margin-top:6px; }
+.b-onair  { border-color:var(--gd); color:var(--gd); flex:1; }
+.b-offair { border-color:var(--red); color:var(--red); flex:1; }
+.b-offair:hover { background:var(--red); color:#0d0f0e; }
+
+/* CLOCK */
+#clockDisplay { font-family:'Orbitron',monospace; font-size:1.1rem; font-weight:700; letter-spacing:.1em; color:var(--g); text-shadow:0 0 8px rgba(77,255,124,.25); margin-top:3px; }
+#dateDisplay  { font-size:.62rem; color:var(--tx-mid); margin-top:3px; }
+#adjDisplay   { font-size:.6rem; color:var(--tx-dim); margin-top:5px; }
+
+/* MIC */
+.mic-status { font-size:.64rem; margin-top:4px; color:var(--tx-mid); }
+.mic-status.ok   { color:var(--g); }
+.mic-status.err  { color:var(--red); }
+.mic-status.warn { color:var(--amb); }
+
+/* DSP PILLS */
+.pills { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; }
+.pill { font-size:.58rem; padding:3px 9px; border:1px solid var(--bd); color:var(--tx-dim); border-radius:12px; cursor:pointer; transition:.12s; }
+.pill:hover { border-color:var(--gd); color:var(--tx-bright); }
+.pill.on { border-color:var(--gd); color:var(--g); background:rgba(46,184,92,.1); }
+
+/* LIBRARY */
+.lib-row { grid-column:1/3; }
+.lib-toolbar { display:flex; gap:6px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+.lib-toolbar input[type=text] { flex:1; background:var(--bg3); border:1px solid var(--bd); color:var(--tx-bright); font-family:'Share Tech Mono',monospace; font-size:.66rem; padding:5px 8px; outline:none; min-width:80px; }
+.lib-toolbar input[type=text]:focus { border-color:var(--gd); }
+.lib-toolbar input[type=text]::placeholder { color:var(--tx-dim); }
+.lib-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(185px,1fr)); gap:3px; max-height:170px; overflow-y:auto; }
+.lib-track { padding:6px 8px; background:var(--bg3); border:1px solid var(--bd); cursor:pointer; font-size:.64rem; color:var(--tx-mid); display:flex; align-items:center; gap:5px; transition:.12s; min-width:0; }
+.lib-track:hover { background:var(--gx); border-color:var(--gd); color:var(--tx-bright); }
+.lib-track.on-a { border-left:2px solid var(--g); }
+.lib-track.on-b { border-left:2px solid var(--blu); }
+.lib-track .tn { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; }
+.lib-track .td { color:var(--tx-dim); font-size:.58rem; flex-shrink:0; }
+.lib-empty { font-size:.64rem; color:var(--tx-dim); padding:16px; text-align:center; grid-column:1/-1; }
+.lib-count { font-size:.62rem; color:var(--tx-dim); white-space:nowrap; }
+
+/* TOAST */
+.toast { position:fixed; bottom:14px; right:14px; background:var(--bg2); border:1px solid var(--gd); color:var(--tx-bright); font-size:.64rem; padding:8px 14px; z-index:99999; animation:tIn .15s ease, tOut .3s ease 1.9s forwards; pointer-events:none; max-width:280px; }
+@keyframes tIn  { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+@keyframes tOut { to{opacity:0} }
+
+input[type=file] { display:none; }
+
+/* MIC + DSP row */
+.mid-row { grid-column:1/3; display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--bd); }
+
+/* CROSSFADER ROW */
+.xfader-row { grid-column:1/3; }
+.xfader-inner { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.xf-deck-label { font-size:.64rem; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; color:var(--tx-mid); }
+.xf-val { font-size:.64rem; color:var(--g); width:52px; text-align:center; flex-shrink:0; font-family:'Orbitron',monospace; }
+#crossfader { flex:1; min-width:80px; }
+
+/* SHOW SCHEDULER — full-width panel */
+.sched-row { grid-column:1/-1; }
+.sched-layout { display:grid; grid-template-columns:210px 1fr 1fr; gap:12px; align-items:start; }
+.sched-col-title { font-size:.58rem; letter-spacing:.12em; color:var(--gd); text-transform:uppercase; margin-bottom:8px; padding-bottom:4px; border-bottom:1px solid var(--bd); }
+
+/* Show list (left col) */
+.sched-show-list { list-style:none; max-height:360px; overflow-y:auto; }
+.sched-show-item { display:flex; flex-direction:column; padding:7px 8px; border:1px solid var(--bd); background:var(--bg3); cursor:pointer; margin-bottom:3px; transition:.12s; border-radius:1px; }
+.sched-show-item:hover { border-color:var(--gd); }
+.sched-show-item.active { border-color:var(--gd); background:rgba(46,184,92,.07); }
+.sched-show-item.on-air { border-color:var(--red); background:rgba(240,80,80,.06); animation:blink 1.5s infinite; }
+.sched-show-item .si-name { font-size:.66rem; color:var(--tx-bright); margin-bottom:3px; }
+.sched-show-item .si-meta { font-size:.54rem; color:var(--tx-dim); display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.sched-show-item .si-deck { color:var(--gd); }
+.sched-show-item .si-btns { display:flex; gap:4px; margin-top:5px; }
+.sched-show-item .si-edit { font-size:.52rem; padding:2px 6px; border-color:var(--bd); color:var(--tx-dim); }
+.sched-show-item .si-edit:hover { border-color:var(--gd); color:var(--gd); }
+.sched-show-item .si-del  { font-size:.52rem; padding:2px 6px; border-color:var(--bd); color:var(--tx-dim); }
+.sched-show-item .si-del:hover  { border-color:var(--red); color:var(--red); }
+.sched-show-item .si-fire { font-size:.52rem; padding:2px 6px; border-color:#1a3a1a; color:var(--gd); }
+.sched-show-item .si-fire:hover { background:var(--gd); color:#0d0f0e; }
+.sched-show-empty { font-size:.62rem; color:var(--tx-dim); padding:10px 4px; font-style:italic; }
+.sched-new-btn { width:100%; margin-top:6px; border-color:var(--gd); color:var(--gd); font-size:.64rem; padding:6px; }
+.sched-new-btn:hover { background:var(--gd); color:#0d0f0e; }
+
+/* Editor (middle col) */
+.sched-editor-col { overflow-y:auto; max-height:400px; }
+.sched-field-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; flex-wrap:wrap; }
+.sched-lbl { font-size:.56rem; color:var(--tx-mid); white-space:nowrap; flex-shrink:0; min-width:44px; }
+.sched-input {
+  font-family:'Share Tech Mono',monospace; font-size:.63rem;
+  background:var(--bg3); border:1px solid var(--bd);
+  color:var(--tx-bright); padding:4px 6px; outline:none; border-radius:1px; transition:.12s;
+}
+.sched-input:focus { border-color:var(--gd); }
+#schedName { flex:1; min-width:100px; }
+input[type=time].sched-input { width:82px; color-scheme:dark; }
+input[type=number].sched-input { width:54px; text-align:center; }
+.sched-select { cursor:pointer; flex:1; min-width:70px; }
+.sched-select option { background:var(--bg3); }
+.sched-carts-row { display:flex; gap:6px; margin-bottom:6px; }
+.sched-cart-block { flex:1; min-width:0; }
+.sched-cart-lbl { font-size:.54rem; color:var(--tx-mid); margin-bottom:3px; letter-spacing:.05em; text-transform:uppercase; }
+.sched-cart-block .sched-select { width:100%; }
+.sched-adbreak-section { border:1px solid var(--bd); padding:7px 8px; margin-bottom:7px; background:rgba(0,0,0,.18); }
+.sched-form-btns { display:flex; gap:6px; margin-top:8px; }
+.sched-save-btn { border-color:var(--gd); color:var(--gd); flex:1; font-size:.64rem; padding:6px; }
+.sched-save-btn:hover { background:var(--gd); color:#0d0f0e; }
+.sched-cancel-btn { border-color:var(--bd); color:var(--tx-dim); font-size:.64rem; padding:6px; }
+.sched-cancel-btn:hover { border-color:var(--red); color:var(--red); }
+
+/* Playlist (right col) */
+.sched-playlist-col { overflow-y:auto; max-height:400px; }
+.sched-pl-hint { font-size:.62rem; color:var(--tx-dim); padding:8px 0; font-style:italic; }
+.sched-pl-list { list-style:none; max-height:240px; overflow-y:auto; margin-bottom:6px; }
+.sched-pl-item { display:flex; align-items:center; gap:5px; padding:4px 5px; font-size:.61rem; color:var(--tx-mid); border-bottom:1px solid var(--bd); }
+.sched-pl-item.pl-adbreak { background:rgba(232,160,32,.07); border-left:2px solid var(--amb); color:var(--amb); }
+.sched-pl-item .pl-num  { font-size:.5rem; color:var(--tx-dim); width:16px; flex-shrink:0; text-align:right; }
+.sched-pl-item .pl-icon { flex-shrink:0; }
+.sched-pl-item .pl-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sched-pl-item .pl-up,.sched-pl-item .pl-dn { font-size:.46rem; padding:1px 4px; border-color:var(--bd); color:var(--tx-dim); flex-shrink:0; }
+.sched-pl-item .pl-up:hover,.sched-pl-item .pl-dn:hover { border-color:var(--gd); color:var(--gd); }
+.sched-pl-item .pl-rm  { font-size:.46rem; padding:1px 4px; border-color:var(--bd); color:var(--tx-dim); flex-shrink:0; }
+.sched-pl-item .pl-rm:hover { border-color:var(--red); color:var(--red); }
+.sched-pl-empty { font-size:.62rem; color:var(--tx-dim); padding:8px 0; font-style:italic; }
+.sched-pl-toolbar { display:flex; flex-wrap:wrap; gap:5px; }
+.sched-pl-btn { font-size:.58rem; padding:3px 7px; border-color:var(--bd); color:var(--tx-mid); }
+.sched-pl-btn:hover { border-color:var(--gd); color:var(--gd); }
+.sched-pl-danger:hover { border-color:var(--red); color:var(--red); background:rgba(240,80,80,.06); }
+
+/* Time budget meter */
+.sched-time-meter { margin-bottom:8px; }
+.stm-bar-wrap { height:8px; background:var(--bg3); border:1px solid var(--bd); border-radius:2px; overflow:hidden; position:relative; margin-bottom:4px; }
+.stm-bar-fill { height:100%; background:var(--gd); transition:width .3s; border-radius:1px; }
+.stm-bar-fill.warn  { background:var(--amb); }
+.stm-bar-fill.full  { background:var(--red); }
+.stm-bar-over { position:absolute; top:0; right:0; height:100%; background:rgba(240,80,80,.7); animation:blink .6s infinite; }
+.stm-labels { display:flex; justify-content:space-between; font-size:.58rem; font-family:'Orbitron',monospace; margin-bottom:3px; }
+#schedTimeUsed { color:var(--tx-bright); }
+#schedTimePct  { color:var(--tx-mid); }
+#schedTimeCap  { color:var(--tx-dim); }
+.stm-breakdown { font-size:.54rem; color:var(--tx-dim); line-height:1.6; }
+.stm-full-warning { font-size:.6rem; color:var(--red); font-weight:bold; margin-top:3px; }
+/* Ad source toggle */
+.sched-source-toggle { display:flex; gap:8px; flex-wrap:wrap; }
+.sst-opt { display:flex; align-items:center; gap:4px; font-size:.61rem; color:var(--tx-mid); cursor:pointer; padding:3px 7px; border:1px solid var(--bd); background:var(--bg3); transition:.12s; }
+.sst-opt:hover { border-color:var(--gd); color:var(--gd); }
+.sst-opt input[type=radio] { accent-color:var(--gd); cursor:pointer; margin:0; }
+/* Ad folder file mini-list */
+#schedAdFileList .adf-item { display:flex; align-items:center; gap:5px; padding:2px 4px; font-size:.56rem; color:var(--tx-dim); border-bottom:1px solid var(--bd); }
+#schedAdFileList .adf-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#schedAdFileList .adf-dur  { flex-shrink:0; font-size:.52rem; }
+#schedAdFileList .adf-rm   { flex-shrink:0; font-size:.48rem; padding:1px 3px; border-color:var(--bd); color:var(--tx-dim); }
+#schedAdFileList .adf-rm:hover { border-color:var(--red); color:var(--red); }
+#schedAdFileList .adf-empty { font-size:.58rem; color:var(--tx-dim); padding:4px 2px; font-style:italic; }
+
+.si-dot { width:7px; height:7px; border-radius:50%; background:var(--bd); display:inline-block; flex-shrink:0; transition:.3s; }
+.si-dot.pending { background:var(--gd); }
+.si-dot.next    { background:var(--amb); box-shadow:0 0 5px var(--amb); }
+.si-dot.on-air  { background:var(--red); box-shadow:0 0 6px var(--red); }
+.si-dot.past    { background:#252525; }
+
+@media(max-width:900px) { .sched-layout { grid-template-columns:1fr 1fr; } .sched-playlist-col { grid-column:1/-1; } }
+@media(max-width:520px)  { .sched-layout { grid-template-columns:1fr; } }
+
+/* DUCK indicator */
+.duck-indicator { font-size:.6rem; margin-top:4px; color:var(--tx-dim); transition:.3s; }
+.duck-indicator.active { color:var(--amb); }
+
+@media(max-width:820px) {
+  .studio { grid-template-columns:1fr 1fr; }
+  .sidebar { grid-column:1/3; grid-row:auto; flex-direction:row; flex-wrap:wrap; }
+  .sidebar .panel { flex:1; min-width:140px; }
+  .mid-row, .lib-row { grid-column:1/3; }
+}
+@media(max-width:520px) {
+  .studio { grid-template-columns:1fr; }
+  .mid-row { grid-template-columns:1fr; }
+  .sidebar { flex-direction:column; }
+  .lib-grid { grid-template-columns:1fr; }
+}
+
+/* ── PWA INSTALL BANNER ── */
+#installBanner {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(90deg, #111614, #141c17);
+  border-top: 1px solid #2eb85c;
+  padding: 12px 18px;
+  z-index: 99998;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  box-shadow: 0 -4px 24px rgba(77,255,124,.08);
+  animation: slideUp .3s ease;
+}
+@keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+#installBanner.show { display: flex; }
+#installBanner .ib-icon { font-size: 1.6rem; flex-shrink: 0; }
+#installBanner .ib-text { flex: 1; min-width: 180px; }
+#installBanner .ib-title { font-family: 'Orbitron', monospace; font-size: .72rem; font-weight: 700; color: #4dff7c; letter-spacing: .12em; }
+#installBanner .ib-sub   { font-size: .58rem; color: #8aa090; margin-top: 2px; }
+#installBanner .ib-btns  { display: flex; gap: 8px; flex-shrink: 0; }
+#installBanner .ib-install {
+  font-family: 'Share Tech Mono', monospace; font-size: .65rem; letter-spacing: .08em;
+  background: #2eb85c; color: #0d0f0e; border: none; padding: 8px 18px;
+  cursor: pointer; font-weight: 700; border-radius: 2px; text-transform: uppercase;
+  transition: .12s;
+}
+#installBanner .ib-install:hover { background: #4dff7c; box-shadow: 0 0 12px rgba(77,255,124,.3); }
+#installBanner .ib-dismiss {
+  font-family: 'Share Tech Mono', monospace; font-size: .6rem;
+  background: transparent; color: #3a5a3a; border: 1px solid #2a4a2a;
+  padding: 8px 12px; cursor: pointer; border-radius: 2px; text-transform: uppercase;
+  transition: .12s;
+}
+#installBanner .ib-dismiss:hover { color: #5a8a5a; border-color: #3a6a3a; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎙 EYETHU <span>PRO</span> RADIO STUDIO</h1>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div id="headerClock" style="font-family:'Orbitron',monospace;font-size:.68rem;color:var(--gd);letter-spacing:.08em;"></div>
+    <div id="onAirBadge">⚪ OFF AIR</div>
+  </div>
+</header>
+
+<!-- Hidden file inputs -->
+<input type="file" id="fileA"   accept="audio/*">
+<input type="file" id="fileB"   accept="audio/*">
+<input type="file" id="fileLib" accept="audio/*" multiple>
+<input type="file" id="cart0"   accept="audio/*">
+<input type="file" id="cart1"   accept="audio/*">
+<input type="file" id="cart2"   accept="audio/*">
+<input type="file" id="cart3"   accept="audio/*">
+
+<div class="studio">
+
+  <!-- ===== DECK A ===== -->
+  <div class="panel" id="panelA">
+    <div class="panel-title">▸ Deck A</div>
+    <div class="deck-info">
+      <div class="deck-letter" style="color:var(--g);text-shadow:0 0 12px var(--g)">A</div>
+      <div style="flex:1;min-width:0;">
+        <div class="track-name" id="nameA">— NO FILE LOADED —</div>
+        <div class="track-time" id="timeA">00:00 / 00:00</div>
+      </div>
+    </div>
+    <div class="waveform" id="wfZoneA">
+      <canvas class="wf-canvas" id="wfA"></canvas>
+      <div class="wf-head" id="headA" style="left:0%"></div>
+    </div>
+    <div class="progress-wrap" id="progA"><div class="progress-fill" id="fillA"></div></div>
+    <div class="transport">
+      <button class="b-load" id="loadA">📂 LOAD</button>
+      <button class="b-play" id="playA">▶ PLAY</button>
+      <button class="b-stop" id="stopA">■ STOP</button>
+      <button class="b-cue"  id="cueSetA">CUE</button>
+      <button class="b-cue"  id="cueGoA" style="border-color:#0a1e35;color:#336688;">↩CUE</button>
+      <button class="b-eject" id="ejectA" title="Eject — remove track from deck">⏏</button>
+    </div>
+    <div class="fader-row">
+      <span class="fader-label">VOL</span>
+      <input type="range" id="volA" min="0" max="1" step="0.01" value="0.9">
+      <span class="fader-val" id="volAd">90%</span>
+    </div>
+    <div class="fader-row">
+      <span class="fader-label">SPEED</span>
+      <input type="range" id="rateA" min="0.5" max="2" step="0.01" value="1">
+      <span class="fader-val" id="rateAd">1.0x</span>
+    </div>
+    <div class="vu-label">OUTPUT LEVEL</div>
+    <canvas class="vu" id="vuA" width="400" height="10"></canvas>
+    <div class="vu-scale"><span>-∞</span><span>-40</span><span>-20</span><span>-6</span><span>0dB</span></div>
+  </div>
+
+  <!-- ===== DECK B ===== -->
+  <div class="panel" id="panelB">
+    <div class="panel-title">▸ Deck B</div>
+    <div class="deck-info">
+      <div class="deck-letter" style="color:var(--blu);text-shadow:0 0 12px var(--blu)">B</div>
+      <div style="flex:1;min-width:0;">
+        <div class="track-name" id="nameB">— NO FILE LOADED —</div>
+        <div class="track-time" id="timeB">00:00 / 00:00</div>
+      </div>
+    </div>
+    <div class="waveform" id="wfZoneB">
+      <canvas class="wf-canvas" id="wfB"></canvas>
+      <div class="wf-head" id="headB" style="left:0%"></div>
+    </div>
+    <div class="progress-wrap" id="progB"><div class="progress-fill" id="fillB"></div></div>
+    <div class="transport">
+      <button class="b-load" id="loadB">📂 LOAD</button>
+      <button class="b-play" id="playB" style="border-color:var(--blu);color:var(--blu)">▶ PLAY</button>
+      <button class="b-stop" id="stopB">■ STOP</button>
+      <button class="b-cue"  id="cueSetB">CUE</button>
+      <button class="b-cue"  id="cueGoB" style="border-color:#0a1e35;color:#336688;">↩CUE</button>
+      <button class="b-eject" id="ejectB" title="Eject — remove track from deck">⏏</button>
+    </div>
+    <div class="fader-row">
+      <span class="fader-label">VOL</span>
+      <input type="range" id="volB" min="0" max="1" step="0.01" value="0.9">
+      <span class="fader-val" id="volBd">90%</span>
+    </div>
+    <div class="fader-row">
+      <span class="fader-label">SPEED</span>
+      <input type="range" id="rateB" min="0.5" max="2" step="0.01" value="1">
+      <span class="fader-val" id="rateBd">1.0x</span>
+    </div>
+    <div class="vu-label">OUTPUT LEVEL</div>
+    <canvas class="vu" id="vuB" width="400" height="10"></canvas>
+    <div class="vu-scale"><span>-∞</span><span>-40</span><span>-20</span><span>-6</span><span>0dB</span></div>
+  </div>
+
+  <!-- ===== CROSSFADER ===== -->
+  <div class="panel xfader-row">
+    <div class="panel-title">⟺ Crossfader / Mixer</div>
+    <div class="xfader-inner">
+      <span class="xf-deck-label" style="color:var(--g)">◀ DECK A</span>
+      <input type="range" id="crossfader" min="0" max="1" step="0.005" value="0.5" style="--v:50%">
+      <span class="xf-val" id="xfVal">MIX</span>
+      <span class="xf-deck-label" style="color:var(--blu)">DECK B ▶</span>
+      <button id="btnAutoCrossfade" style="font-size:.52rem;padding:4px 9px;white-space:nowrap;flex-shrink:0;">AUTO X-FADE (3s)</button>
+    </div>
+  </div>
+
+  <!-- ===== SIDEBAR ===== -->
+  <div class="sidebar">
+
+    <!-- Queue -->
+    <div class="panel">
+      <div class="panel-title">▸ Queue</div>
+      <ul class="queue-list" id="queueList">
+        <li class="q-empty">Queue empty — import files then click tracks</li>
+      </ul>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;">
+        <button style="font-size:.48rem;padding:3px 7px;" id="btnClearQ">CLEAR</button>
+        <button style="font-size:.48rem;padding:3px 7px;" id="btnShuffleQ">SHUFFLE</button>
+        <button style="font-size:.48rem;padding:3px 7px;border-color:#1a1a38;color:#5050aa;" id="btnAutoDJ">AUTO-DJ: ON</button>
+      </div>
+    </div>
+
+    <!-- Cartwall -->
+    <div class="panel">
+      <div class="panel-title">▸ Cartwall</div>
+      <div class="cart-grid" id="cartGrid"></div>
+    </div>
+
+    <!-- Streaming -->
+    <div class="panel">
+      <div class="panel-title">▸ Live Stream</div>
+      <div style="font-size:.58rem;color:#3a4a3a;">
+        <span class="stream-dot" id="streamDot"></span><span id="streamTxt">OFFLINE</span>
+      </div>
+      <div class="fader-row" style="margin-top:8px;">
+        <span class="fader-label">MASTER</span>
+        <input type="range" id="masterVol" min="0" max="1" step="0.01" value="1">
+        <span class="fader-val" id="masterVold">100%</span>
+      </div>
+      <div class="stream-btns">
+        <button class="b-onair"  id="btnOnAir">🔴 ON AIR</button>
+        <button class="b-offair" id="btnOffAir">⚪ OFF AIR</button>
+      </div>
+    </div>
+
+    <!-- Clock -->
+    <div class="panel">
+      <div class="panel-title">▸ Studio Clock</div>
+      <div id="clockDisplay">--:--:--</div>
+      <div id="dateDisplay"></div>
+      <div id="adjDisplay">AUTO-DJ: ON — STANDBY</div>
+    </div>
+
+  </div>
+
+  <!-- ===== MIC + DSP ===== -->
+  <div class="mid-row">
+
+    <!-- Mic -->
+    <div class="panel">
+      <div class="panel-title">🎤 Microphone</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:1.4rem;">🎙️</div>
+        <div style="flex:1;">
+          <div class="fader-row">
+            <span class="fader-label">MIC VOL</span>
+            <input type="range" id="micVol" min="0" max="1" step="0.01" value="0.8">
+            <span class="fader-val" id="micVold">80%</span>
+          </div>
+          <div class="vu-label">MIC LEVEL</div>
+          <canvas class="vu" id="vuMic" width="400" height="10"></canvas>
+          <div class="mic-status warn" id="micStatus">MIC: CLICK MIC ON TO ENABLE</div>
+          <div class="duck-indicator" id="duckIndicator">AUTO-DUCK: STANDBY</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:5px;margin-top:7px;">
+        <button id="btnMicOn">🎤 MIC ON</button>
+        <button id="btnMicReconnect" style="border-color:#1a3535;color:#009090;font-size:.55rem;">🔄 RECONNECT</button>
+      </div>
+    </div>
+
+    <!-- DSP -->
+    <div class="panel">
+      <div class="panel-title">⚙️ Broadcast DSP Chain</div>
+      <div style="font-size:.42rem;color:#2a4028;margin-bottom:6px;">BASS → STEREO → EXCITER → SOFT CLIP → LIMITER</div>
+      <div class="fader-row">
+        <span class="fader-label">BASS</span>
+        <input type="range" id="dspBass" min="-12" max="12" step="1" value="0">
+        <span class="fader-val" id="dspBassd">0</span>
+      </div>
+      <div class="fader-row">
+        <span class="fader-label">MID</span>
+        <input type="range" id="dspMid" min="-12" max="12" step="1" value="0">
+        <span class="fader-val" id="dspMidd">0</span>
+      </div>
+      <div class="fader-row">
+        <span class="fader-label">TREBLE</span>
+        <input type="range" id="dspTreb" min="-12" max="12" step="1" value="0">
+        <span class="fader-val" id="dspTrebd">0</span>
+      </div>
+      <div class="fader-row">
+        <span class="fader-label">COMP</span>
+        <input type="range" id="dspComp" min="-40" max="0" step="1" value="-18">
+        <span class="fader-val" id="dspCompd">-18</span>
+      </div>
+      <div class="fader-row">
+        <span class="fader-label">CLIP AMT</span>
+        <input type="range" id="dspClipAmt" min="10" max="400" step="10" value="200">
+        <span class="fader-val" id="dspClipAmtd">200</span>
+      </div>
+      <div class="fader-row">
+        <span class="fader-label">LIMIT THR</span>
+        <input type="range" id="dspLimitThr" min="-20" max="0" step="1" value="-3">
+        <span class="fader-val" id="dspLimitThrd">-3dB</span>
+      </div>
+      <div class="pills" id="pillRow"></div>
+    </div>
+
+  </div>
+
+  <!-- ===== LIBRARY ===== -->
+  <div class="panel lib-row">
+    <div class="panel-title">📂 Music Library — Click: Queue &nbsp;|&nbsp; Double-click: Deck A &nbsp;|&nbsp; Right-click: Deck B</div>
+    <div class="lib-toolbar">
+      <button id="btnImport" style="white-space:nowrap;padding:5px 11px;">📂 IMPORT FILES</button>
+      <input type="text" id="libSearch" placeholder="Search...">
+      <span class="lib-count" id="libCount">0 tracks</span>
+      <button id="btnClearLib" style="border-color:#2a1414;color:#5a3030;font-size:.52rem;padding:3px 6px;">✕ CLEAR</button>
+    </div>
+    <div class="lib-grid" id="libGrid">
+      <div class="lib-empty">No tracks — click IMPORT FILES to load your music</div>
+    </div>
+  </div>
+
+  <!-- ===== SHOW SCHEDULER ===== -->
+  <div class="panel sched-row">
+    <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>📅 Show Scheduler</span>
+      <span id="schedOnAir" style="font-size:.58rem;color:var(--tx-dim);font-family:'Share Tech Mono',monospace;"></span>
+    </div>
+
+    <div class="sched-layout">
+
+      <!-- LEFT: show list -->
+      <div class="sched-shows-col">
+        <div class="sched-col-title">SCHEDULED SHOWS</div>
+        <ul class="sched-show-list" id="schedShowList">
+          <li class="sched-show-empty" id="schedShowEmpty">No shows — create one →</li>
+        </ul>
+      </div>
+
+      <!-- MIDDLE: show editor -->
+      <div class="sched-editor-col" id="schedEditor">
+        <div class="sched-col-title" id="schedEditorTitle">NEW SHOW</div>
+
+        <div class="sched-field-row">
+          <label class="sched-lbl">SHOW NAME</label>
+          <input type="text" id="schedName" class="sched-input" placeholder="e.g. Morning Drive" maxlength="40">
+        </div>
+        <div class="sched-field-row">
+          <label class="sched-lbl">START</label>
+          <input type="time" id="schedStart" class="sched-input" value="06:00">
+          <label class="sched-lbl" style="margin-left:8px;">END</label>
+          <input type="time" id="schedEnd" class="sched-input" value="09:00">
+        </div>
+        <div class="sched-field-row">
+          <label class="sched-lbl">DECK</label>
+          <select id="schedDeck" class="sched-input sched-select">
+            <option value="A">Deck A</option>
+            <option value="B">Deck B</option>
+          </select>
+        </div>
+
+        <!-- Carts row -->
+        <div class="sched-carts-row">
+          <div class="sched-cart-block">
+            <div class="sched-cart-lbl">INTRO CART</div>
+            <select id="schedIntroCart" class="sched-input sched-select">
+              <option value="">— none —</option>
+              <option value="0">🌅 Cart 1</option>
+              <option value="1">📰 Cart 2</option>
+              <option value="2">🌆 Cart 3</option>
+              <option value="3">📡 Cart 4</option>
+            </select>
+          </div>
+          <div class="sched-cart-block">
+            <div class="sched-cart-lbl">OUTRO CART</div>
+            <select id="schedOutroCart" class="sched-input sched-select">
+              <option value="">— none —</option>
+              <option value="0">🌅 Cart 1</option>
+              <option value="1">📰 Cart 2</option>
+              <option value="2">🌆 Cart 3</option>
+              <option value="3">📡 Cart 4</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Ad break / inter-song cart -->
+        <div class="sched-adbreak-section">
+          <div class="sched-cart-lbl" style="margin-bottom:6px;">AD BREAK <span style="color:var(--tx-dim);font-size:.54rem;">(plays between songs — never cuts)</span></div>
+
+          <!-- Source toggle -->
+          <div class="sched-field-row" style="margin-bottom:8px;">
+            <label class="sched-lbl">SOURCE</label>
+            <div class="sched-source-toggle">
+              <label class="sst-opt"><input type="radio" name="schedAdSource" id="schedAdSrcCart" value="cart" checked> 🎛 Cart slot</label>
+              <label class="sst-opt"><input type="radio" name="schedAdSource" id="schedAdSrcFolder" value="folder"> 📁 Folder / Files</label>
+            </div>
+          </div>
+
+          <!-- Cart source panel (existing, unchanged) -->
+          <div id="schedAdCartPanel">
+            <div class="sched-field-row">
+              <label class="sched-lbl">CART</label>
+              <select id="schedAdCart" class="sched-input sched-select">
+                <option value="">— none —</option>
+                <option value="0">🌅 Cart 1</option>
+                <option value="1">📰 Cart 2</option>
+                <option value="2">🌆 Cart 3</option>
+                <option value="3">📡 Cart 4</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Folder source panel (new) -->
+          <div id="schedAdFolderPanel" style="display:none;">
+            <div class="sched-field-row">
+              <button id="schedAdPickFiles" class="sched-pl-btn" style="font-size:.6rem;">+ FILES</button>
+              <button id="schedAdPickFolder" class="sched-pl-btn" style="font-size:.6rem;">+ FOLDER</button>
+              <span id="schedAdFileCount" style="font-size:.58rem;color:var(--tx-dim);margin-left:4px;">0 files loaded</span>
+            </div>
+            <div class="sched-field-row">
+              <label class="sched-lbl">ORDER</label>
+              <select id="schedAdPlayMode" class="sched-input sched-select">
+                <option value="sequence">▶ In sequence</option>
+                <option value="random">🔀 Random</option>
+              </select>
+            </div>
+            <div class="sched-field-row">
+              <label class="sched-lbl">IN A ROW</label>
+              <input type="number" id="schedAdInARow" class="sched-input" value="1" min="1" max="10" style="width:52px;">
+              <span style="font-size:.58rem;color:var(--tx-dim);margin-left:4px;">files per break</span>
+            </div>
+            <!-- small file list -->
+            <div id="schedAdFileList" style="max-height:72px;overflow-y:auto;margin-top:4px;"></div>
+            <input type="file" id="schedAdFileInput" accept="audio/*" multiple style="display:none;">
+            <input type="file" id="schedAdFolderInput" accept="audio/*" multiple webkitdirectory style="display:none;">
+          </div>
+
+          <!-- Trigger (shared by both sources) -->
+          <div class="sched-field-row" style="margin-top:6px;">
+            <label class="sched-lbl">TRIGGER</label>
+            <select id="schedAdTrigger" class="sched-input sched-select">
+              <option value="">— disabled —</option>
+              <option value="songs">After N songs</option>
+              <option value="minutes">After X minutes</option>
+              <option value="clock">At HH:MM</option>
+            </select>
+          </div>
+          <div id="schedAdTriggerDetail" style="display:none;">
+            <div class="sched-field-row" id="schedAdSongsRow" style="display:none;">
+              <label class="sched-lbl">SONGS</label>
+              <input type="number" id="schedAdSongs" class="sched-input" value="3" min="1" max="99" style="width:60px;">
+              <span style="font-size:.6rem;color:var(--tx-dim);margin-left:4px;">songs between breaks</span>
+            </div>
+            <div class="sched-field-row" id="schedAdMinsRow" style="display:none;">
+              <label class="sched-lbl">MINUTES</label>
+              <input type="number" id="schedAdMins" class="sched-input" value="20" min="1" max="180" style="width:60px;">
+              <span style="font-size:.6rem;color:var(--tx-dim);margin-left:4px;">minutes between breaks</span>
+            </div>
+            <div class="sched-field-row" id="schedAdClockRow" style="display:none;">
+              <label class="sched-lbl">TIMES</label>
+              <input type="text" id="schedAdClockTimes" class="sched-input" placeholder="08:00, 09:00, 10:00" style="flex:1;">
+            </div>
+          </div>
+        </div>
+
+        <div class="sched-form-btns">
+          <button id="schedSaveBtn" class="sched-save-btn">💾 SAVE SHOW</button>
+          <button id="schedCancelBtn" class="sched-cancel-btn">✕ CANCEL</button>
+        </div>
+      </div>
+
+      <!-- RIGHT: playlist editor -->
+      <div class="sched-playlist-col" id="schedPlaylistCol">
+        <div class="sched-col-title">PLAYLIST <span id="schedPlName" style="color:var(--tx-dim);font-weight:normal;"></span></div>
+
+        <!-- Time budget meter -->
+        <div class="sched-time-meter" id="schedTimeMeter" style="display:none;">
+          <div class="stm-bar-wrap">
+            <div class="stm-bar-fill" id="schedTimeFill"></div>
+            <div class="stm-bar-over" id="schedTimeOver" style="display:none;"></div>
+          </div>
+          <div class="stm-labels">
+            <span id="schedTimeUsed">0:00</span>
+            <span id="schedTimePct">0%</span>
+            <span id="schedTimeCap">/ 0:00</span>
+          </div>
+          <div class="stm-breakdown" id="schedTimeBreakdown"></div>
+        </div>
+
+        <div class="sched-pl-hint" id="schedPlHint">Select a show to edit its playlist</div>
+        <ul class="sched-pl-list" id="schedPlList"></ul>
+        <div class="sched-pl-toolbar" id="schedPlToolbar" style="display:none;">
+          <button id="schedPlAddLib" class="sched-pl-btn" title="Add all tracks from library">+ FROM LIBRARY</button>
+          <button id="schedPlAddFiles" class="sched-pl-btn" title="Pick files from your computer">+ FROM FILES</button>
+          <button id="schedPlAddFolder" class="sched-pl-btn" title="Pick an entire folder">+ FOLDER</button>
+          <button id="schedPlClear" class="sched-pl-btn sched-pl-danger" title="Clear playlist">✕ CLEAR</button>
+        </div>
+        <!-- hidden file inputs -->
+        <input type="file" id="schedFileInput" accept="audio/*" multiple style="display:none;">
+        <input type="file" id="schedFolderInput" accept="audio/*" multiple webkitdirectory style="display:none;">
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- .studio -->
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+//  HELPERS  (defined before anything else)
+// ─────────────────────────────────────────────────────────────────────────────
+function ge(id) { return document.getElementById(id); }
+function zp(n)  { return String(n).padStart(2, '0'); }
+function fmtT(s) {
+  if (!s || !isFinite(s) || s < 0) return '00:00';
+  return zp(Math.floor(s / 60)) + ':' + zp(Math.floor(s % 60));
+}
+function noExt(name) { return name.replace(/\.[^/.]+$/, ''); }
+function sgn(v) { return (v >= 0 ? '+' : '') + v; }
+function pct(v) { return Math.round(v * 100) + '%'; }
+
+function toast(msg) {
+  var d = document.createElement('div');
+  d.className = 'toast';
+  d.textContent = '▸ ' + msg;
+  document.body.appendChild(d);
+  setTimeout(function() { d.remove(); }, 2400);
+}
+
+// Set a range slider's CSS fill variable and its display element
+function setSlider(id, dispId, valFmt) {
+  var el = ge(id);
+  if (!el) return;
+  var ratio = (el.value - el.min) / (el.max - el.min);
+  el.style.setProperty('--v', (ratio * 100) + '%');
+  if (dispId) ge(dispId).textContent = valFmt ? valFmt(+el.value) : el.value;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────────────────────────────────────
+// Core audio uses plain HTMLAudioElement — no Web Audio API for playback.
+// Web Audio only used for VU metering (analyser).
+var ACX = null;   // AudioContext for metering only
+var masterGain = null;
+
+var decks = {
+  A: { audio: new Audio(), cue: 0, objURL: null, file: null, srcNode: null, analNode: null },
+  B: { audio: new Audio(), cue: 0, objURL: null, file: null, srcNode: null, analNode: null }
+};
+
+var micStream = null, micGain = null, micOn = false;
+var micAnal   = null;   // VU-meter analyser on output path
+var micDetect = null;   // speech-detection analyser — isolated, never touches output
+var micHPF    = null;   // high-pass filter before micDetect (cuts DC offset / rumble)
+var autoDJOn = true;
+var lib = [], queue = [];
+var vu = { A: 0, B: 0, mic: 0 };
+
+var cartFiles = [null, null, null, null];
+var cartAudios= [null, null, null, null];
+var cartNames = ['MORNING PROMO', 'NOON NEWS', 'EVENING AD', 'STATION ID'];
+var cartEmoji = ['🌅', '📰', '🌆', '📡'];
+
+var dspEnabled = { bass: false, mid: false, treb: false, comp: false, clip: false, limit: false };
+var pillDefs = [
+  { key:'bass',  label:'BASS BOOST'  },
+  { key:'mid',   label:'MID EQ'      },
+  { key:'treb',  label:'EXCITER'     },
+  { key:'comp',  label:'COMPRESSOR'  },
+  { key:'clip',  label:'SOFT CLIP'   },
+  { key:'limit', label:'LIMITER'     },
+];
+
+// ─── CROSSFADER ───────────────────────────────────────────────────────────────
+var xfGainA = null, xfGainB = null;   // gain nodes for crossfader
+var xfTimerID = null;
+
+// ─── DUCKING ──────────────────────────────────────────────────────────────────
+// TWO SEPARATE gain nodes so mic duck and jingle duck never fight each other.
+// Final music level = micDuckGain × jingleDuckGain × masterGain
+var micDuckGain    = null;   // controlled by mic speech detection
+var jingleDuckGain = null;   // controlled by cartwall play/stop
+var micDucking     = false;
+var MIC_DUCK_LEVEL  = 0.2;   // music drops to 20% when DJ speaks
+var MIC_GATE_THRESH = 0.028; // RMS threshold — above = speaking, below = silence
+var MIC_ONSET_FRAMES  = 2;   // consecutive frames above threshold before ducking starts
+var MIC_RELEASE_FRAMES = 55; // consecutive frames below threshold before music restores (~0.9s @60fps)
+var micSpeakCount  = 0;      // consecutive frames detected as speech
+var micSilCount    = 0;      // consecutive frames detected as silence
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  SCHEDULER  — fully editable
+// ─────────────────────────────────────────────────────────────────────────────
+//  SHOW SCHEDULER
+//  show: { id, name, startHH, startMM, endHH, endMM, deck,
+//          introCart, outroCart,
+//          adCart, adTrigger ('songs'|'minutes'|'clock'|''),
+//          adEveryN, adEveryMins, adClockTimes (csv "HH:MM"),
+//          playlist[] }
+//  playlist item: { name, file (File obj, not stored), type:'track'|'adbreak' }
+//  File objects are held in schedFileCache[showId][name]
+// ─────────────────────────────────────────────────────────────────────────────
+var SHOWS        = [];
+var schedFired   = {};
+var schedActive  = null;
+var schedSelIdx  = -1;
+var schedNewMode = true;
+var schedFileCache = {};   // showId → { trackName: File }
+
+// Runtime show state (reset on each fireShow)
+var showState = {
+  id: null,
+  deck: 'A',
+  playlist: [],
+  plIdx: 0,
+  songsSincAd: 0,
+  showStartMs: 0,
+  lastAdMs: 0,
+  adClockFired: {},
+  adPending: false,     // ad queued — overlay will fire at next quiet passage
+  adOverlayActive: false, // ad is currently playing as overlay
+  adOverlayTimer: null,   // fallback timer if no quiet passage found
+  outroPending: false,
+  adPoolOrder: [],
+  adPoolIdx: 0
+};
+
+// Ad overlay constants — ads RIDE OVER music, never cut it
+var AD_DUCK_LEVEL   = 0.52;   // music drops to 52% under the ad — still audible
+var AD_DUCK_RAMP    = 1.2;    // 1.2s smooth fade down — not jarring
+var AD_RESTORE_RAMP = 2.5;    // 2.5s gentle fade back up after ad ends
+var AD_QUIET_THRESH = 0.06;   // RMS below this = quiet passage (lower = more selective)
+var AD_QUIET_FRAMES = 10;     // ~0.16s of quiet before firing (at 60fps)
+var AD_END_WINDOW   = 18;     // fire overlay in last N seconds of a song
+var AD_INTRO_WINDOW = 10;     // ad can still be playing over first N seconds of next song
+var AD_FALLBACK_MS  = 25000;  // last resort: fire after 25s if no quiet/end passage found
+var adQuietCount    = 0;      // consecutive quiet frames counter
+
+// ── Persistence ──────────────────────────────────────────────────────────────
+function saveShows() {
+  // Save shows without File objects (can't serialise those)
+  var slim = SHOWS.map(function(s) {
+    return Object.assign({}, s, {
+      playlist: (s.playlist||[]).map(function(p){ return { name:p.name, type:p.type||'track' }; })
+    });
+  });
+  try { localStorage.setItem('eyethu_shows', JSON.stringify(slim)); } catch(e) {}
+}
+function loadShows() {
+  try { var r = localStorage.getItem('eyethu_shows'); if (r) SHOWS = JSON.parse(r); } catch(e) {}
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function showTime(s){ return zp(s.startHH)+':'+zp(s.startMM)+' – '+zp(s.endHH)+':'+zp(s.endMM); }
+
+function showDotClass(show) {
+  var now=new Date(), nm=now.getHours()*60+now.getMinutes();
+  var sm=show.startHH*60+show.startMM, em=show.endHH*60+show.endMM;
+  if (show.id===schedActive) return 'on-air';
+  if (schedFired[show.id]||nm>em) return 'past';
+  if (sm-nm<=60&&sm>nm) return 'next';
+  if (sm>nm) return 'pending';
+  return 'past';
+}
+
+function cacheFile(showId, name, file) {
+  if (!schedFileCache[showId]) schedFileCache[showId] = {};
+  schedFileCache[showId][name] = file;
+}
+function resolveFile(showId, name) {
+  return (schedFileCache[showId]||{})[name] ||
+         (lib.find(function(l){ return l.name===name; })||{}).file || null;
+}
+
+// ── Show list UI ─────────────────────────────────────────────────────────────
+function buildShowList() {
+  var ul = ge('schedShowList'), emp = ge('schedShowEmpty');
+  if (!ul) return;
+  Array.from(ul.querySelectorAll('.sched-show-item,.sched-new-btn-li')).forEach(function(e){e.remove();});
+  if (!SHOWS.length) { emp.style.display='block'; }
+  else {
+    emp.style.display='none';
+    SHOWS.slice().sort(function(a,b){ return (a.startHH*60+a.startMM)-(b.startHH*60+b.startMM); })
+    .forEach(function(show) {
+      var idx=SHOWS.indexOf(show);
+      var li=document.createElement('li');
+      li.className='sched-show-item'+(idx===schedSelIdx?' active':'')+(show.id===schedActive?' on-air':'');
+      var dot=document.createElement('span'); dot.className='si-dot '+showDotClass(show);
+      var nm=document.createElement('div'); nm.className='si-name'; nm.textContent=show.name;
+      var meta=document.createElement('div'); meta.className='si-meta';
+      var tracks=(show.playlist||[]).filter(function(p){return (p.type||'track')==='track';}).length;
+      meta.innerHTML='<span>'+showTime(show)+'</span><span class="si-deck">DECK '+show.deck+'</span>'
+        +'<span>'+tracks+' tracks</span>';
+      meta.prepend(dot);
+      var btns=document.createElement('div'); btns.className='si-btns';
+      var eb=document.createElement('button'); eb.className='si-edit'; eb.textContent='✎ EDIT';
+      eb.addEventListener('click',(function(i){return function(e){e.stopPropagation();selectShow(i);};})(idx));
+      var fb=document.createElement('button'); fb.className='si-fire'; fb.textContent='▶ FIRE';
+      fb.addEventListener('click',(function(i){return function(e){e.stopPropagation();fireShow(i);};})(idx));
+      var db=document.createElement('button'); db.className='si-del'; db.textContent='✕';
+      db.addEventListener('click',(function(i){return function(e){e.stopPropagation();deleteShow(i);};})(idx));
+      btns.appendChild(eb); btns.appendChild(fb); btns.appendChild(db);
+      li.appendChild(nm); li.appendChild(meta); li.appendChild(btns);
+      ul.appendChild(li);
+    });
+  }
+  var nl=document.createElement('li'); nl.className='sched-new-btn-li';
+  var nb=document.createElement('button'); nb.className='sched-new-btn'; nb.textContent='+ NEW SHOW';
+  nb.addEventListener('click', newShowForm);
+  nl.appendChild(nb); ul.appendChild(nl);
+}
+
+// ── Editor form ───────────────────────────────────────────────────────────────
+function newShowForm() {
+  schedSelIdx=-1; schedNewMode=true;
+  ge('schedEditorTitle').textContent='NEW SHOW';
+  ge('schedName').value=''; ge('schedStart').value='06:00'; ge('schedEnd').value='09:00';
+  ge('schedDeck').value='A'; ge('schedIntroCart').value=''; ge('schedOutroCart').value='';
+  ge('schedAdCart').value=''; ge('schedAdTrigger').value='';
+  ge('schedAdTriggerDetail').style.display='none';
+  ge('schedAdSrcCart').checked=true;
+  ge('schedAdCartPanel').style.display='block';
+  ge('schedAdFolderPanel').style.display='none';
+  ge('schedAdPlayMode').value='sequence';
+  ge('schedAdInARow').value='1';
+  buildAdFileListUI(-1);
+  ge('schedPlHint').style.display='block';
+  ge('schedPlList').innerHTML=''; ge('schedPlToolbar').style.display='none';
+  ge('schedPlName').textContent='';
+  buildShowList();
+}
+
+function selectShow(idx) {
+  var s=SHOWS[idx]; if (!s) return;
+  schedSelIdx=idx; schedNewMode=false;
+  ge('schedEditorTitle').textContent='EDIT SHOW';
+  ge('schedName').value=s.name;
+  ge('schedStart').value=zp(s.startHH)+':'+zp(s.startMM);
+  ge('schedEnd').value=zp(s.endHH)+':'+zp(s.endMM);
+  ge('schedDeck').value=s.deck;
+  ge('schedIntroCart').value=(s.introCart!=null&&s.introCart!=='')?String(s.introCart):'';
+  ge('schedOutroCart').value=(s.outroCart!=null&&s.outroCart!=='')?String(s.outroCart):'';
+  ge('schedAdCart').value=(s.adCart!=null&&s.adCart!=='')?String(s.adCart):'';
+  ge('schedAdTrigger').value=s.adTrigger||'';
+  updateAdTriggerUI(s.adTrigger||'');
+  ge('schedAdSongs').value=s.adEveryN||3;
+  ge('schedAdMins').value=s.adEveryMins||20;
+  ge('schedAdClockTimes').value=(s.adClockTimes||[]).join(', ');
+  // Restore ad source
+  var src=s.adSource||'cart';
+  ge('schedAdSrcCart').checked=(src==='cart');
+  ge('schedAdSrcFolder').checked=(src==='folder');
+  ge('schedAdCartPanel').style.display=src==='cart'?'block':'none';
+  ge('schedAdFolderPanel').style.display=src==='folder'?'block':'none';
+  ge('schedAdPlayMode').value=s.adPlayMode||'sequence';
+  ge('schedAdInARow').value=s.adInARow||1;
+  buildAdFileListUI(idx);
+  buildShowList();
+  buildPlaylistEditor(idx);
+}
+
+function updateAdTriggerUI(val) {
+  var det=ge('schedAdTriggerDetail');
+  var sr=ge('schedAdSongsRow'), mr=ge('schedAdMinsRow'), cr=ge('schedAdClockRow');
+  if (!val) { det.style.display='none'; return; }
+  det.style.display='block';
+  sr.style.display=val==='songs'?'flex':'none';
+  mr.style.display=val==='minutes'?'flex':'none';
+  cr.style.display=val==='clock'?'flex':'none';
+}
+
+ge('schedAdTrigger').addEventListener('change', function(){ updateAdTriggerUI(this.value); });
+
+// ── Ad source toggle ──────────────────────────────────────────────────────────
+function updateAdSourceUI(src) {
+  ge('schedAdCartPanel').style.display   = src==='cart'   ? 'block' : 'none';
+  ge('schedAdFolderPanel').style.display = src==='folder' ? 'block' : 'none';
+}
+ge('schedAdSrcCart').addEventListener('change', function(){ updateAdSourceUI('cart'); refreshMeterFromEditor(); });
+ge('schedAdSrcFolder').addEventListener('change', function(){ updateAdSourceUI('folder'); refreshMeterFromEditor(); });
+
+// ── Ad folder file pool ───────────────────────────────────────────────────────
+// schedAdFileCache[showId] = [ {name, dur, file} ]
+var schedAdFileCache = {};
+
+function getAdPool(showId) {
+  return schedAdFileCache[showId] || [];
+}
+
+function buildAdFileListUI(showIdx) {
+  var pool = showIdx >= 0 ? getAdPool(SHOWS[showIdx] ? SHOWS[showIdx].id : null) : [];
+  var el = ge('schedAdFileList');
+  el.innerHTML = '';
+  ge('schedAdFileCount').textContent = pool.length + ' file' + (pool.length!==1?'s':'') + ' loaded';
+  if (!pool.length) {
+    var e = document.createElement('div'); e.className='adf-empty';
+    e.textContent = 'No files — add from files or folder above';
+    el.appendChild(e); return;
+  }
+  pool.forEach(function(item, i) {
+    var row = document.createElement('div'); row.className='adf-item';
+    var nm = document.createElement('span'); nm.className='adf-name';
+    nm.textContent = noExt(item.name); nm.title = item.name;
+    var dur = document.createElement('span'); dur.className='adf-dur';
+    dur.textContent = item.dur ? fmtMSS(item.dur) : '';
+    var rm = document.createElement('button'); rm.className='adf-rm'; rm.textContent='✕';
+    rm.addEventListener('click', (function(idx2){ return function(){
+      var sid = SHOWS[schedSelIdx] ? SHOWS[schedSelIdx].id : null;
+      if (!sid) return;
+      schedAdFileCache[sid].splice(idx2, 1);
+      buildAdFileListUI(schedSelIdx);
+      refreshMeterFromEditor();
+    }; })(i));
+    row.appendChild(nm); row.appendChild(dur); row.appendChild(rm);
+    el.appendChild(row);
+  });
+}
+
+function loadAdFiles(files) {
+  if (schedSelIdx < 0) { toast('Select a show first'); return; }
+  var show = SHOWS[schedSelIdx]; if (!show) return;
+  if (!schedAdFileCache[show.id]) schedAdFileCache[show.id] = [];
+  var pool = schedAdFileCache[show.id];
+  var arr = Array.from(files).filter(function(f){ return f.type.startsWith('audio/'); });
+  var added = 0, i = 0;
+  function next() {
+    if (i >= arr.length) {
+      buildAdFileListUI(schedSelIdx);
+      refreshMeterFromEditor();
+      toast(added + ' ad file' + (added!==1?'s':'') + ' loaded');
+      return;
+    }
+    var f = arr[i++];
+    if (pool.some(function(p){ return p.name===f.name; })) { next(); return; }
+    probeFileDur(f, function(dur) {
+      pool.push({ name: f.name, dur: dur, file: f });
+      added++;
+      next();
+    });
+  }
+  next();
+}
+
+ge('schedAdPickFiles').addEventListener('click', function(){ ge('schedAdFileInput').click(); });
+ge('schedAdPickFolder').addEventListener('click', function(){ ge('schedAdFolderInput').click(); });
+ge('schedAdFileInput').addEventListener('change', function(){ loadAdFiles(this.files); this.value=''; });
+ge('schedAdFolderInput').addEventListener('change', function(){ loadAdFiles(this.files); this.value=''; });
+
+// ── Duration helpers ─────────────────────────────────────────────────────────
+
+// Show cap in seconds from start/end times
+function showCapSec(show) {
+  return ((show.endHH*60+show.endMM) - (show.startHH*60+show.startMM)) * 60;
+}
+
+// Get duration of a cart slot in seconds (from cartFiles Audio element)
+function getCartDur(slot) {
+  if (slot==null||slot==='') return 0;
+  var f=cartFiles[parseInt(slot)];
+  if (!f) return 0;
+  // Use cached dur if available
+  var k='cartDur_'+slot;
+  if (window[k]>0) return window[k];
+  return 0; // will be probed async
+}
+
+// Probe cart duration and cache it
+function probeCartDur(slot, cb) {
+  if (slot==null||slot==='') { cb(0); return; }
+  var f=cartFiles[parseInt(slot)];
+  if (!f) { cb(0); return; }
+  var k='cartDur_'+slot;
+  if (window[k]>0) { cb(window[k]); return; }
+  var a=new Audio();
+  var url=URL.createObjectURL(f);
+  a.addEventListener('loadedmetadata', function(){
+    window[k]=a.duration||0;
+    URL.revokeObjectURL(url);
+    cb(window[k]);
+  }, {once:true});
+  a.addEventListener('error', function(){ URL.revokeObjectURL(url); cb(0); }, {once:true});
+  a.src=url;
+}
+
+// Estimate total ad break cart seconds for a show
+// adTrigger: songs/minutes/clock, adEveryN, adEveryMins, adClockTimes
+function estimateAdBreakSecs(show, trackDurs) {
+  if (!show.adTrigger) return 0;
+  var inARow = show.adInARow || 1;
+  var singleBreakDur = 0;
+  if (show.adSource === 'folder') {
+    // Average duration of folder pool files × inARow
+    var pool = getAdPool(show.id);
+    if (!pool.length) return 0;
+    var avg = pool.reduce(function(a,b){ return a+b.dur; }, 0) / pool.length;
+    singleBreakDur = avg * inARow;
+  } else {
+    if (show.adCart == null || show.adCart === '') return 0;
+    singleBreakDur = getCartDur(show.adCart);
+  }
+  var totalTrackSec = trackDurs.reduce(function(a,b){ return a+b; }, 0);
+  var breakCount = 0;
+  if (show.adTrigger==='songs' && show.adEveryN>0) {
+    breakCount = Math.floor(trackDurs.length / show.adEveryN);
+  } else if (show.adTrigger==='minutes' && show.adEveryMins>0) {
+    breakCount = Math.floor(totalTrackSec / 60 / show.adEveryMins);
+  } else if (show.adTrigger==='clock') {
+    breakCount = (show.adClockTimes||[]).length;
+  }
+  return breakCount * singleBreakDur;
+}
+
+// Compute used seconds for a show's playlist including all carts
+function calcUsedSecs(show) {
+  var pl=show.playlist||[];
+  var trackSecs=pl.filter(function(p){return p.type==='track';})
+                  .map(function(p){return p.dur||0;});
+  var musicSec=trackSecs.reduce(function(a,b){return a+b;},0);
+  var introDur=getCartDur(show.introCart);
+  var outroDur=getCartDur(show.outroCart);
+  var adSec=estimateAdBreakSecs(show, trackSecs);
+  return {music:musicSec, intro:introDur, outro:outroDur, ads:adSec,
+          total:musicSec+introDur+outroDur+adSec};
+}
+
+function fmtMSS(sec) {
+  if (!sec||sec<0) return '0:00';
+  var m=Math.floor(sec/60), s=Math.floor(sec%60);
+  return m+':'+zp(s);
+}
+
+// ── Time meter UI ─────────────────────────────────────────────────────────────
+function updateTimeMeter(show) {
+  var meter=ge('schedTimeMeter');
+  if (!show) { meter.style.display='none'; return; }
+  meter.style.display='block';
+
+  var cap=showCapSec(show);
+  var u=calcUsedSecs(show);
+  var used=u.total;
+  var pct=cap>0?Math.min(used/cap,1):0;
+  var over=used>cap;
+  var warn=pct>=0.85&&!over;
+
+  var fill=ge('schedTimeFill');
+  fill.style.width=(Math.min(pct,1)*100)+'%';
+  fill.className='stm-bar-fill'+(over?' full':warn?' warn':'');
+
+  var overEl=ge('schedTimeOver');
+  if (over) {
+    var overPct=Math.min(((used-cap)/cap)*100, 30);
+    overEl.style.display='block';
+    overEl.style.width=overPct+'%';
+  } else {
+    overEl.style.display='none';
+  }
+
+  ge('schedTimeUsed').textContent=fmtMSS(used);
+  ge('schedTimePct').textContent=Math.round(pct*100)+'%';
+  ge('schedTimeCap').textContent='/ '+fmtMSS(cap);
+  ge('schedTimeUsed').style.color=over?'var(--red)':warn?'var(--amb)':'var(--tx-bright)';
+
+  var parts=[];
+  if (u.music>0)  parts.push('Music: '+fmtMSS(u.music));
+  if (u.intro>0)  parts.push('Intro: '+fmtMSS(u.intro));
+  if (u.outro>0)  parts.push('Outro: '+fmtMSS(u.outro));
+  if (u.ads>0)    parts.push('Ad breaks: ~'+fmtMSS(u.ads));
+  var remaining=cap-used;
+  if (remaining>0) parts.push('<span style="color:var(--gd)">Free: '+fmtMSS(remaining)+'</span>');
+
+  var bd=ge('schedTimeBreakdown');
+  bd.innerHTML=parts.join(' · ');
+  if (over) {
+    bd.innerHTML+='<div class="stm-full-warning">⛔ Show exceeds time limit by '+fmtMSS(used-cap)+'</div>';
+  }
+}
+
+// ── Playlist editor ───────────────────────────────────────────────────────────
+function buildPlaylistEditor(idx) {
+  var show=SHOWS[idx], pl=show?(show.playlist||[]):[];
+  ge('schedPlHint').style.display='none';
+  ge('schedPlToolbar').style.display='flex';
+  ge('schedPlName').textContent=show?'— '+show.name:'';
+  updateTimeMeter(show);
+
+  var list=ge('schedPlList'); list.innerHTML='';
+  if (!pl.length) {
+    var e=document.createElement('li'); e.className='sched-pl-empty';
+    e.textContent='Playlist empty — add tracks below'; list.appendChild(e); return;
+  }
+  var trackNum=0;
+  pl.forEach(function(item,ti) {
+    var isAd=(item.type==='adbreak');
+    if (!isAd) trackNum++;
+    var li=document.createElement('li');
+    li.className='sched-pl-item'+(isAd?' pl-adbreak':'');
+
+    var num=document.createElement('span'); num.className='pl-num';
+    num.textContent=isAd?'⬛':trackNum;
+    var icon=document.createElement('span'); icon.className='pl-icon';
+    icon.textContent=isAd?'📢':'🎵';
+    var nm=document.createElement('span'); nm.className='pl-name';
+    nm.textContent=isAd?'— AD BREAK —':noExt(item.name); nm.title=item.name||'';
+
+    // Duration label
+    var durEl=document.createElement('span');
+    durEl.style.cssText='font-size:.5rem;color:var(--tx-dim);flex-shrink:0;margin-right:2px;';
+    durEl.textContent=item.dur?fmtMSS(item.dur):'';
+
+    var upBtn=document.createElement('button'); upBtn.className='pl-up'; upBtn.textContent='▲';
+    upBtn.disabled=ti===0;
+    upBtn.addEventListener('click',(function(i){return function(){movePlItem(idx,i,-1);};})(ti));
+    var dnBtn=document.createElement('button'); dnBtn.className='pl-dn'; dnBtn.textContent='▼';
+    dnBtn.disabled=ti===pl.length-1;
+    dnBtn.addEventListener('click',(function(i){return function(){movePlItem(idx,i,1);};})(ti));
+    var rmBtn=document.createElement('button'); rmBtn.className='pl-rm'; rmBtn.textContent='✕';
+    rmBtn.addEventListener('click',(function(i){return function(){removePlItem(idx,i);};})(ti));
+
+    li.appendChild(num); li.appendChild(icon); li.appendChild(nm);
+    li.appendChild(durEl);
+    li.appendChild(upBtn); li.appendChild(dnBtn); li.appendChild(rmBtn);
+    list.appendChild(li);
+  });
+}
+
+// Probe duration of a File and call cb(seconds)
+function probeFileDur(file, cb) {
+  var url=URL.createObjectURL(file);
+  var a=new Audio();
+  a.addEventListener('loadedmetadata', function(){ URL.revokeObjectURL(url); cb(a.duration||0); }, {once:true});
+  a.addEventListener('error', function(){ URL.revokeObjectURL(url); cb(0); }, {once:true});
+  a.src=url;
+}
+
+// Add tracks to playlist with duration checking — processes files one by one async
+function addFilesToPlaylist(files) {
+  if (schedSelIdx<0) { toast('Select a show first'); return; }
+  var show=SHOWS[schedSelIdx];
+  if (!show.playlist) show.playlist=[];
+  var arr=Array.from(files).filter(function(f){ return f.type.startsWith('audio/'); });
+  if (!arr.length) { toast('No audio files found'); return; }
+
+  var added=0, skippedDup=0, skippedFull=0;
+  var idx2=0;
+
+  function next() {
+    if (idx2>=arr.length) {
+      saveShows(); buildPlaylistEditor(schedSelIdx);
+      var msg=added+' track'+(added!==1?'s':'')+' added';
+      if (skippedFull>0) msg+=' · '+skippedFull+' skipped (show full)';
+      if (skippedDup>0)  msg+=' · '+skippedDup+' duplicate'+(skippedDup!==1?'s':'');
+      toast(msg);
+      return;
+    }
+    var f=arr[idx2++];
+    // Check duplicate
+    if (show.playlist.some(function(p){return p.name===f.name&&p.type!=='adbreak';})) {
+      skippedDup++; next(); return;
+    }
+    // Probe duration then check cap
+    probeFileDur(f, function(dur) {
+      var cap=showCapSec(show);
+      var u=calcUsedSecs(show);
+      if (cap>0 && u.total+dur > cap) {
+        skippedFull++; next(); return;
+      }
+      cacheFile(show.id, f.name, f);
+      show.playlist.push({name:f.name, type:'track', dur:dur});
+      added++;
+      next();
+    });
+  }
+  next();
+}
+
+function addLibToPlaylist() {
+  if (schedSelIdx<0) { toast('Select a show first'); return; }
+  var show=SHOWS[schedSelIdx];
+  if (!show.playlist) show.playlist=[];
+  var toAdd=lib.filter(function(t){
+    return !show.playlist.some(function(p){return p.name===t.name&&p.type!=='adbreak';});
+  });
+  if (!toAdd.length) { toast('All library tracks already in playlist'); return; }
+
+  var added=0, skippedFull=0;
+  var i=0;
+  function next() {
+    if (i>=toAdd.length) {
+      saveShows(); buildPlaylistEditor(schedSelIdx);
+      var msg=added+' track'+(added!==1?'s':'')+' added from library';
+      if (skippedFull>0) msg+=' · '+skippedFull+' skipped (show full)';
+      toast(msg);
+      return;
+    }
+    var t=toAdd[i++];
+    var dur=t.dur||0;
+    var cap=showCapSec(show);
+    var u=calcUsedSecs(show);
+    if (cap>0 && u.total+dur > cap) { skippedFull++; next(); return; }
+    show.playlist.push({name:t.name, type:'track', dur:dur});
+    added++;
+    next();
+  }
+  next();
+}
+
+function addAdBreakToPlaylist() {
+  if (schedSelIdx<0) { toast('Select a show first'); return; }
+  var show=SHOWS[schedSelIdx];
+  if (!show.playlist) show.playlist=[];
+  show.playlist.push({name:'adbreak',type:'adbreak',dur:0});
+  saveShows(); buildPlaylistEditor(schedSelIdx);
+  toast('Ad break marker added');
+}
+
+function movePlItem(showIdx,ti,dir) {
+  var pl=SHOWS[showIdx].playlist, ni=ti+dir;
+  if (ni<0||ni>=pl.length) return;
+  var tmp=pl[ti]; pl[ti]=pl[ni]; pl[ni]=tmp;
+  saveShows(); buildPlaylistEditor(showIdx);
+}
+function removePlItem(showIdx,ti) {
+  SHOWS[showIdx].playlist.splice(ti,1);
+  saveShows(); buildPlaylistEditor(showIdx);
+}
+
+// ── Save show ─────────────────────────────────────────────────────────────────
+function saveShow() {
+  var name=ge('schedName').value.trim();
+  var start=ge('schedStart').value, end=ge('schedEnd').value;
+  var deck=ge('schedDeck').value;
+  var introCart=ge('schedIntroCart').value, outroCart=ge('schedOutroCart').value;
+  var adCart=ge('schedAdCart').value, adTrigger=ge('schedAdTrigger').value;
+  var adEveryN=parseInt(ge('schedAdSongs').value)||3;
+  var adEveryMins=parseInt(ge('schedAdMins').value)||20;
+  var adClockRaw=ge('schedAdClockTimes').value.trim();
+  var adClockTimes=adClockRaw?adClockRaw.split(',').map(function(s){return s.trim();}).filter(Boolean):[];
+  var adSource=ge('schedAdSrcFolder').checked?'folder':'cart';
+  var adPlayMode=ge('schedAdPlayMode').value||'sequence';
+  var adInARow=parseInt(ge('schedAdInARow').value)||1;
+
+  if (!name) { toast('Enter a show name'); ge('schedName').focus(); return; }
+  if (!start||!end) { toast('Set start and end times'); return; }
+  var sp=start.split(':'), ep=end.split(':');
+  var sHH=parseInt(sp[0]),sMM=parseInt(sp[1]),eHH=parseInt(ep[0]),eMM=parseInt(ep[1]);
+
+  var data={
+    name:name, startHH:sHH, startMM:sMM, endHH:eHH, endMM:eMM, deck:deck,
+    introCart:introCart!==''?parseInt(introCart):null,
+    outroCart:outroCart!==''?parseInt(outroCart):null,
+    adCart:adCart!==''?parseInt(adCart):null,
+    adTrigger:adTrigger, adEveryN:adEveryN, adEveryMins:adEveryMins, adClockTimes:adClockTimes,
+    adSource:adSource, adPlayMode:adPlayMode, adInARow:adInARow
+  };
+
+  if (schedNewMode) {
+    data.id='show_'+Date.now(); data.playlist=[];
+    SHOWS.push(data);
+    schedSelIdx=SHOWS.length-1; schedNewMode=false;
+    ge('schedEditorTitle').textContent='EDIT SHOW';
+    ge('schedPlToolbar').style.display='flex';
+    ge('schedPlHint').style.display='none';
+    ge('schedPlName').textContent='— '+name;
+    ge('schedPlList').innerHTML='<li class="sched-pl-empty">Playlist empty — add tracks below</li>';
+    toast('Show "'+name+'" created — now add tracks →');
+  } else {
+    Object.assign(SHOWS[schedSelIdx], data);
+    toast('Show updated');
+  }
+  saveShows(); buildShowList();
+}
+
+function deleteShow(idx) {
+  var show=SHOWS[idx]; if (!show) return;
+  if (schedSelIdx===idx) { schedSelIdx=-1; schedNewMode=true; newShowForm(); }
+  if (schedActive===show.id) schedActive=null;
+  delete schedFileCache[show.id];
+  SHOWS.splice(idx,1);
+  saveShows(); buildShowList(); toast('Show deleted');
+}
+
+// ── Fire show ─────────────────────────────────────────────────────────────────
+function fireShow(idx) {
+  var show=SHOWS[idx]; if (!show) return;
+
+  // Init and resume AudioContext — scheduler fires without user gesture
+  initACX();
+  if (ACX && ACX.state==='suspended') ACX.resume();
+
+  schedActive=show.id;
+  schedFired[show.id]=true;
+
+  // Resolve playlist tracks — skip any whose files are no longer in cache
+  var resolved=[];
+  (show.playlist||[]).forEach(function(p) {
+    if (p.type==='adbreak') { resolved.push({name:p.name,type:'adbreak',file:null}); return; }
+    var f=resolveFile(show.id, p.name);
+    if (f) resolved.push({name:p.name,type:'track',file:f});
+    // If file missing, silently skip — show still fires with whatever is available
+  });
+
+  // If nothing resolved (all files missing, e.g. after page reload), still mark fired
+  // and show toast so DJ knows
+  if (!resolved.length) {
+    toast('⚠ Show "'+show.name+'" fired but no track files available — reload files');
+    ge('schedOnAir').textContent='⚠ '+show.name+' (no files)';
+    buildShowList();
+    return;
+  }
+
+  // Build ad pool order for folder source
+  var adPool = getAdPool(show.id);  // [{name,dur,file}]
+  var adPoolOrder = adPool.map(function(_,i){ return i; });
+  if (show.adSource==='folder' && show.adPlayMode==='random') {
+    // Fisher-Yates shuffle
+    for (var i=adPoolOrder.length-1;i>0;i--) {
+      var j=Math.floor(Math.random()*(i+1));
+      var t=adPoolOrder[i]; adPoolOrder[i]=adPoolOrder[j]; adPoolOrder[j]=t;
+    }
+  }
+
+  // Init show runtime state
+  showState.id=show.id;
+  showState.deck=show.deck;
+  showState.playlist=resolved;
+  showState.plIdx=0;
+  showState.songsSincAd=0;
+  showState.showStartMs=Date.now();
+  showState.lastAdMs=Date.now();
+  showState.adClockFired={};
+  showState.adPending=false;
+  showState.adOverlayActive=false;
+  showState.adOverlayTimer=null;
+  showState.outroPending=false;
+  adQuietCount=0;
+  showState.adPoolOrder=adPoolOrder;
+  showState.adPoolIdx=0;
+
+  // Intro cart — play immediately
+  if (show.introCart!=null) {
+    playCart(show.introCart);
+    setTimeout(function(){ startNextShowTrack(show); }, 500);
+  } else {
+    startNextShowTrack(show);
+  }
+
+  ge('schedOnAir').textContent='🔴 ON AIR: '+show.name;
+  toast('▶ ON AIR: '+show.name);
+  buildShowList();
+}
+
+// Play N ad files from folder pool sequentially, then call onDone
+function playAdFolderFiles(show, count, onDone) {
+  var ss = showState;
+  var pool = getAdPool(show.id);
+  if (!pool.length) { onDone(); return; }
+  var played = 0;
+
+  // Duck music gently — ad will ride over it
+  duckForAd();
+
+  function playOne() {
+    if (played >= count) {
+      // All files in this break played — restore music gradually
+      restoreFromAd();
+      onDone();
+      return;
+    }
+
+    var orderIdx = ss.adPoolIdx % ss.adPoolOrder.length;
+    var poolIdx  = ss.adPoolOrder[orderIdx];
+    ss.adPoolIdx++;
+    if (ss.adPoolIdx % ss.adPoolOrder.length === 0 && show.adPlayMode==='random') {
+      for (var i=ss.adPoolOrder.length-1;i>0;i--) {
+        var j=Math.floor(Math.random()*(i+1));
+        var t=ss.adPoolOrder[i]; ss.adPoolOrder[i]=ss.adPoolOrder[j]; ss.adPoolOrder[j]=t;
+      }
+    }
+
+    var item = pool[poolIdx];
+    if (!item||!item.file) { played++; playOne(); return; }
+
+    var url = URL.createObjectURL(item.file);
+    var aud = new Audio(url);
+
+    // Route ad through ACX so it lives in the same mix as the music
+    initACX();
+    var adSrc = null;
+    try {
+      adSrc = ACX.createMediaElementSource(aud);
+      adSrc.connect(masterGain);
+    } catch(e) {
+      // Fallback if ACX not ready — plays on device output
+    }
+
+    aud.addEventListener('ended', function() {
+      if (adSrc) { try { adSrc.disconnect(); } catch(e){} }
+      URL.revokeObjectURL(url);
+      played++;
+      setTimeout(playOne, 150);
+    }, {once:true});
+    aud.addEventListener('error', function() {
+      if (adSrc) { try { adSrc.disconnect(); } catch(e){} }
+      URL.revokeObjectURL(url);
+      played++;
+      playOne();
+    }, {once:true});
+    aud.play().catch(function(){
+      if (adSrc) { try { adSrc.disconnect(); } catch(e){} }
+      played++;
+      playOne();
+    });
+    toast('📢 Ad: '+noExt(item.name)+' ('+(played+1)+'/'+count+')');
+  }
+  playOne();
+}
+
+function startNextShowTrack(show) {
+  var ss=showState;
+  if (ss.id!==show.id) return;
+
+  // Handle inline adbreak markers in playlist — queue as overlay, skip the marker
+  while (ss.plIdx<ss.playlist.length && ss.playlist[ss.plIdx].type==='adbreak') {
+    ss.plIdx++;
+    // Set adPending so the overlay engine fires it during the next song
+    ss.adPending = true;
+    // Don't arm fallback here — will be armed after next track starts
+  }
+
+  if (ss.plIdx>=ss.playlist.length) { playOutro(show); return; }
+
+  var item=ss.playlist[ss.plIdx];
+  ss.plIdx++;
+
+  // Skip tracks with no resolved file — move to next
+  if (!item.file) {
+    toast('⚠ Skipping "'+item.name+'" — file not available');
+    startNextShowTrack(show);
+    return;
+  }
+
+  ss.songsSincAd++;
+  adQuietCount = 0; // reset quiet counter for new track
+  // If an ad is already pending (set before this track started), re-arm the fallback
+  if (ss.adPending && !ss.adOverlayActive) {
+    armAdOverlayFallback(show, ss);
+  }
+
+  var id=show.deck;
+  // Ensure ACX is running before loading — auto-fires may not have user gesture
+  initACX();
+  if (ACX && ACX.state==='suspended') ACX.resume();
+
+  loadToDeck(id, item.file);
+  decks[id].onended=null;
+  // Remove any stale event listeners before adding new ones
+  decks[id].audio.onended = null;
+
+  // canplay fires when enough data is buffered to start playing
+  decks[id].audio.addEventListener('canplay', function oncp(){
+    decks[id].audio.removeEventListener('canplay', oncp);
+    if (ACX && ACX.state==='suspended') ACX.resume();
+    decks[id].audio.play().then(function(){
+      ge('play'+id).textContent='❚❚ PAUSE';
+      ge('play'+id).classList.add('on');
+    }).catch(function(e){
+      // Autoplay blocked — try once more after a short delay
+      setTimeout(function(){
+        decks[id].audio.play().catch(function(){
+          toast('⚠ Autoplay blocked — tap Play on Deck '+id+' to continue');
+        });
+      }, 300);
+    });
+  }, {once:true});
+
+  // Timeout safety: if canplay hasn't fired in 8s, skip to next track
+  var canplayTimeout = setTimeout(function(){
+    if (ss.id!==show.id) return;
+    if (decks[id].audio.readyState >= 2) return; // already playing
+    toast('⚠ Skipping "'+item.name+'" — failed to load in time');
+    startNextShowTrack(show);
+  }, 8000);
+
+  decks[id].audio.addEventListener('canplay', function(){ clearTimeout(canplayTimeout); }, {once:true});
+
+  decks[id].audio.addEventListener('ended', function onEnd(){
+    decks[id].audio.removeEventListener('ended', onEnd);
+    if (ss.id!==show.id) return;
+    // Cancel end-of-song fallback timer — song is naturally done
+    cancelAdOverlayTimer(ss);
+    if (ss.outroPending) {
+      // If ad is still playing over the outro, let it finish first
+      if (ss.adOverlayActive) return; // afterAd will call playOutro
+      playOutro(show);
+      return;
+    }
+    // KEY BEHAVIOUR: if an ad overlay is active, start the NEXT SONG immediately
+    // so the ad rides over the intro of the next track — exactly like a real DJ
+    // The ad's afterAd callback will see music is running and do nothing extra.
+    startNextShowTrack(show);
+  }, {once:true});
+}
+
+// ── Ad overlay engine ────────────────────────────────────────────────────────
+// Priority order for firing an overlay ad:
+//   1. END OF SONG  — last AD_END_WINDOW seconds of current track
+//   2. QUIET PASSAGE — RMS drops below AD_QUIET_THRESH for AD_QUIET_FRAMES
+//   3. FALLBACK TIMER — if nothing found, fire after AD_FALLBACK_MS
+// The ad fades music to AD_DUCK_LEVEL, plays OVER the music, then fades back.
+// Music NEVER stops — ad and music play simultaneously.
+function processAdOverlay() {
+  if (!schedActive || !showState.adPending || showState.adOverlayActive) return;
+  var show = SHOWS.find(function(s){ return s.id===schedActive; });
+  if (!show) return;
+  var ss = showState;
+  var deckId = ss.deck;
+  var aud = decks[deckId] && decks[deckId].audio;
+  var anal = decks[deckId] && decks[deckId].analNode;
+  if (!anal || !ACX || !aud) return;
+  if (!aud.duration || aud.paused) return;
+
+  // ── 1. END-OF-SONG WINDOW: fire now if in last AD_END_WINDOW seconds ─────
+  var remaining = aud.duration - aud.currentTime;
+  if (remaining > 0 && remaining <= AD_END_WINDOW) {
+    adQuietCount = 0;
+    fireAdOverlay(show, ss);
+    return;
+  }
+
+  // ── 2. QUIET PASSAGE: sustained RMS dip mid-song ─────────────────────────
+  var buf = new Float32Array(anal.fftSize);
+  try { anal.getFloatTimeDomainData(buf); } catch(e) { return; }
+  var sum = 0;
+  for (var i=0; i<buf.length; i++) sum += buf[i]*buf[i];
+  var rms = Math.sqrt(sum/buf.length);
+
+  // Only fire quiet-passage trigger if we are NOT already near the end
+  // (the end-of-song window handles that) and not in the first 5 seconds
+  if (aud.currentTime > 5 && remaining > AD_END_WINDOW) {
+    if (rms < AD_QUIET_THRESH) {
+      adQuietCount++;
+      if (adQuietCount >= AD_QUIET_FRAMES) {
+        adQuietCount = 0;
+        fireAdOverlay(show, ss);
+      }
+    } else {
+      adQuietCount = 0;
+    }
+  }
+  // ── 3. Fallback timer is armed separately by armAdOverlayFallback ────────
+}
+
+function cancelAdOverlayTimer(ss) {
+  if (ss.adOverlayTimer) {
+    clearTimeout(ss.adOverlayTimer);
+    ss.adOverlayTimer = null;
+  }
+}
+
+function armAdOverlayFallback(show, ss) {
+  cancelAdOverlayTimer(ss);
+  // If no quiet passage found within AD_FALLBACK_MS, fire the ad anyway
+  ss.adOverlayTimer = setTimeout(function() {
+    if (ss.id !== showState.id) return;
+    if (!ss.adPending || ss.adOverlayActive) return;
+    adQuietCount = 0;
+    fireAdOverlay(show, ss);
+  }, AD_FALLBACK_MS);
+}
+
+function fireAdOverlay(show, ss) {
+  if (!ss.adPending || ss.adOverlayActive) return;
+  ss.adPending = false;
+  ss.adOverlayActive = true;
+  ss.songsSincAd = 0;
+  ss.lastAdMs = Date.now();
+  cancelAdOverlayTimer(ss);
+
+  var afterAd = function() {
+    ss.adOverlayActive = false;
+    // Music fade-back is already scheduled by duckForAd/restoreFromAd
+    // If deck ended while ad was playing, advance to next track now
+    var deckAud = decks[ss.deck] && decks[ss.deck].audio;
+    if (deckAud && (deckAud.ended || deckAud.paused)) {
+      if (ss.outroPending) { playOutro(show); return; }
+      if (ss.id === schedActive) startNextShowTrack(show);
+    }
+    // Otherwise music is still playing — it will advance naturally on .ended
+  };
+
+  if (show.adSource==='folder') {
+    // playAdFolderFiles handles duckForAd/restoreFromAd internally
+    playAdFolderFiles(show, show.adInARow||1, afterAd);
+  } else if (show.adCart!=null && cartFiles[show.adCart]) {
+    // Route cart through ACX into masterGain — sits in the mix with music
+    var url = URL.createObjectURL(cartFiles[show.adCart]);
+    var cartAud = new Audio(url);
+    initACX();
+    var cartSrc = null;
+    try {
+      cartSrc = ACX.createMediaElementSource(cartAud);
+      cartSrc.connect(masterGain);
+    } catch(e) {}
+
+    // Gentle duck — music stays audible under the ad
+    duckForAd();
+
+    cartAud.addEventListener('ended', function(){
+      if (cartSrc) { try { cartSrc.disconnect(); } catch(e){} }
+      URL.revokeObjectURL(url);
+      restoreFromAd();
+      afterAd();
+    }, {once:true});
+    cartAud.addEventListener('error', function(){
+      if (cartSrc) { try { cartSrc.disconnect(); } catch(e){} }
+      URL.revokeObjectURL(url);
+      restoreFromAd();
+      afterAd();
+    }, {once:true});
+    cartAud.play().catch(function(){
+      if (cartSrc) { try { cartSrc.disconnect(); } catch(e){} }
+      restoreFromAd();
+      afterAd();
+    });
+    toast('📢 On air: '+cartNames[show.adCart]);
+  } else {
+    ss.adOverlayActive = false;
+  }
+}
+
+function playOutro(show) {
+  cancelAdOverlayTimer(showState);
+  showState.adPending=false;
+  showState.adOverlayActive=false;
+  adQuietCount=0;
+  schedActive=null;
+  ge('schedOnAir').textContent='';
+  if (show.outroCart!=null) {
+    playCart(show.outroCart);
+    toast('■ Show ended: '+show.name+' — playing outro');
+  } else {
+    toast('■ Show ended: '+show.name);
+  }
+  buildShowList();
+}
+
+// ── Scheduler clock check (called every second from tickClock) ────────────────
+function checkScheduler() {
+  var now=new Date();
+  var hh=now.getHours(), mm=now.getMinutes(), ss=now.getSeconds();
+  var nowMins = hh*60+mm; // current time in minutes since midnight
+
+  // Daily reset at midnight
+  if (hh===0&&mm===0&&ss<3) { schedFired={}; schedActive=null; ge('schedOnAir').textContent=''; }
+
+  SHOWS.forEach(function(show,idx) {
+    var startMins = show.startHH*60+show.startMM;
+    var endMins   = show.endHH*60+show.endMM;
+
+    // Fire if: not yet fired AND (we are within the show window OR we just passed start)
+    // The ss<5 guard is replaced with a window check so missed fires still catch up.
+    if (!schedFired[show.id] && nowMins>=startMins && nowMins<endMins) {
+      fireShow(idx);
+    }
+
+    // Outro at end time — set pending once, checked per-second
+    if (show.id===schedActive && nowMins>=endMins && !showState.outroPending) {
+      showState.outroPending=true;
+    }
+  });
+
+  // Ad break trigger checks (only when a show is on air)
+  if (schedActive) {
+    var activeShow=SHOWS.find(function(s){return s.id===schedActive;});
+    // Ad break is possible if: folder mode with files loaded, OR cart mode with cart set
+    var adReady = activeShow && activeShow.adTrigger && !showState.adPending && (
+      (activeShow.adSource==='folder' && getAdPool(activeShow.id).length > 0) ||
+      (activeShow.adSource!=='folder' && activeShow.adCart != null)
+    );
+    if (adReady) {
+      var trig=activeShow.adTrigger;
+
+      if (trig==='songs'&&showState.songsSincAd>=activeShow.adEveryN) {
+        showState.adPending=true;
+        armAdOverlayFallback(activeShow, showState);
+        toast('📢 Ad queued — will play at next quiet passage');
+      }
+      else if (trig==='minutes') {
+        var elapsedMins=(Date.now()-showState.lastAdMs)/60000;
+        if (elapsedMins>=activeShow.adEveryMins) {
+          showState.adPending=true;
+          armAdOverlayFallback(activeShow, showState);
+          toast('📢 Ad queued — will play at next quiet passage');
+        }
+      }
+      else if (trig==='clock'&&ss<5) {
+        var clkKey=zp(hh)+':'+zp(mm);
+        if (!showState.adClockFired[clkKey]&&(activeShow.adClockTimes||[]).indexOf(clkKey)>=0) {
+          showState.adClockFired[clkKey]=true;
+          showState.adPending=true;
+          armAdOverlayFallback(activeShow, showState);
+          toast('📢 Scheduled ad queued — will play at next quiet passage');
+        }
+      }
+    }
+  }
+
+  // Refresh show list dots every 30s
+  if (ss<2||ss===30) buildShowList();
+}
+
+// ── Event listeners ───────────────────────────────────────────────────────────
+ge('schedSaveBtn').addEventListener('click', saveShow);
+ge('schedCancelBtn').addEventListener('click', newShowForm);
+ge('schedName').addEventListener('keydown', function(e){ if(e.key==='Enter') saveShow(); });
+
+// Refresh time meter live when show times or carts change
+function refreshMeterFromEditor() {
+  if (schedSelIdx < 0) return;
+  var show = SHOWS[schedSelIdx];
+  // Temporarily apply editor values for meter calculation
+  var start = ge('schedStart').value, end = ge('schedEnd').value;
+  if (start && end) {
+    var sp=start.split(':'), ep=end.split(':');
+    show.startHH=parseInt(sp[0]); show.startMM=parseInt(sp[1]);
+    show.endHH=parseInt(ep[0]);   show.endMM=parseInt(ep[1]);
+  }
+  show.introCart = ge('schedIntroCart').value !== '' ? parseInt(ge('schedIntroCart').value) : null;
+  show.outroCart = ge('schedOutroCart').value !== '' ? parseInt(ge('schedOutroCart').value) : null;
+  show.adCart    = ge('schedAdCart').value    !== '' ? parseInt(ge('schedAdCart').value)    : null;
+  show.adTrigger = ge('schedAdTrigger').value;
+  show.adEveryN  = parseInt(ge('schedAdSongs').value)||3;
+  show.adEveryMins = parseInt(ge('schedAdMins').value)||20;
+  var raw = ge('schedAdClockTimes').value.trim();
+  show.adClockTimes = raw ? raw.split(',').map(function(s){return s.trim();}).filter(Boolean) : [];
+  show.adSource   = ge('schedAdSrcFolder').checked ? 'folder' : 'cart';
+  show.adPlayMode = ge('schedAdPlayMode').value || 'sequence';
+  show.adInARow   = parseInt(ge('schedAdInARow').value) || 1;
+  updateTimeMeter(show);
+}
+['schedStart','schedEnd','schedIntroCart','schedOutroCart','schedAdCart','schedAdTrigger','schedAdSongs','schedAdMins'].forEach(function(id) {
+  var el = ge(id); if (el) el.addEventListener('change', refreshMeterFromEditor);
+});
+ge('schedAdClockTimes').addEventListener('input', refreshMeterFromEditor);
+
+ge('schedPlAddLib').addEventListener('click', addLibToPlaylist);
+ge('schedPlAddFiles').addEventListener('click', function(){ ge('schedFileInput').click(); });
+ge('schedPlAddFolder').addEventListener('click', function(){ ge('schedFolderInput').click(); });
+
+ge('schedFileInput').addEventListener('change', function(){ addFilesToPlaylist(this.files); this.value=''; });
+ge('schedFolderInput').addEventListener('change', function(){ addFilesToPlaylist(this.files); this.value=''; });
+
+ge('schedPlClear').addEventListener('click', function(){
+  if (schedSelIdx<0) return;
+  SHOWS[schedSelIdx].playlist=[];
+  saveShows(); buildPlaylistEditor(schedSelIdx); toast('Playlist cleared');
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  AUDIO CONTEXT  (for VU metering only — playback is raw HTML5 audio)
+// ─────────────────────────────────────────────────────────────────────────────
+function initACX() {
+  if (ACX) return;
+  // latencyHint:'playback' tells the OS this is a media app, not a communication app.
+  // On Android/iOS this keeps volume keys on the MEDIA channel, not the call/mic channel.
+  ACX = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'playback' });
+
+  // Two independent duck gains in series:
+  //   decks → xfGains → micDuckGain → jingleDuckGain → masterGain → destination
+  // This way mic ducking and jingle ducking never interfere with each other.
+  micDuckGain    = ACX.createGain(); micDuckGain.gain.value    = 1.0;
+  jingleDuckGain = ACX.createGain(); jingleDuckGain.gain.value = 1.0;
+
+  masterGain = ACX.createGain();
+  masterGain.gain.value = +ge('masterVol').value;
+
+  jingleDuckGain.connect(masterGain);
+  masterGain.connect(ACX.destination);
+  micDuckGain.connect(jingleDuckGain);
+
+  // Per-deck crossfader gain nodes (equal-power)
+  xfGainA = ACX.createGain(); xfGainA.gain.value = 1;
+  xfGainB = ACX.createGain(); xfGainB.gain.value = 1;
+  xfGainA.connect(micDuckGain);
+  xfGainB.connect(micDuckGain);
+
+  ['A', 'B'].forEach(function(id) {
+    var d = decks[id];
+    d.audio.crossOrigin = 'anonymous';
+    try {
+      var src  = ACX.createMediaElementSource(d.audio);
+      var anal = ACX.createAnalyser();
+      anal.fftSize = 1024;
+      anal.smoothingTimeConstant = 0.75;
+      src.connect(anal);
+      anal.connect(id === 'A' ? xfGainA : xfGainB);
+      d.srcNode  = src;
+      d.analNode = anal;
+    } catch(e) {
+      console.warn('Deck ' + id + ' analyser error:', e);
+    }
+  });
+
+  updateCrossfader();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  LOAD FILE ONTO DECK
+// ─────────────────────────────────────────────────────────────────────────────
+function loadToDeck(id, file) {
+  if (!file) return;
+
+  var d = decks[id];
+  d.file = file;
+
+  // Revoke old URL
+  if (d.objURL) URL.revokeObjectURL(d.objURL);
+  d.objURL = URL.createObjectURL(file);
+
+  // Set source directly on the Audio element — simple and reliable
+  d.audio.src = d.objURL;
+  d.audio.volume = +ge('vol' + id).value;
+  d.audio.playbackRate = +ge('rate' + id).value;
+  d.audio.load();
+  d.cue = 0;
+
+  ge('name' + id).textContent = noExt(file.name);
+  ge('fill' + id).style.width = '0%';
+  ge('head' + id).style.left  = '0%';
+  ge('time' + id).textContent = '00:00 / 00:00';
+
+  drawWaveform(id, file);
+  toast('Deck ' + id + ': ' + noExt(file.name));
+  markLibItems();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  PLAY / PAUSE / STOP
+// ─────────────────────────────────────────────────────────────────────────────
+function togglePlay(id) {
+  // Init AudioContext on first user action (browser autoplay policy)
+  initACX();
+  if (ACX.state === 'suspended') ACX.resume();
+
+  var d   = decks[id];
+  var btn = ge('play' + id);
+
+  if (!d.audio.src) { toast('Load a file into Deck ' + id + ' first!'); return; }
+
+  if (!d.audio.paused) {
+    d.audio.pause();
+    btn.textContent = '▶ PLAY';
+    btn.classList.remove('on');
+  } else {
+    d.audio.play()
+      .then(function() {
+        btn.textContent = '❚❚ PAUSE';
+        btn.classList.add('on');
+      })
+      .catch(function(e) { toast('Play error: ' + e.message); });
+  }
+}
+
+function stopDeck(id) {
+  var d = decks[id];
+  d.audio.pause();
+  d.audio.currentTime = 0;
+  ge('play' + id).textContent = '▶ PLAY';
+  ge('play' + id).classList.remove('on');
+  ge('fill' + id).style.width = '0%';
+  ge('head' + id).style.left  = '0%';
+  ge('panel' + id).style.boxShadow = '';
+}
+
+function seekDeck(id, e) {
+  var d = decks[id];
+  if (!d.audio.duration) return;
+  var r = e.currentTarget.getBoundingClientRect();
+  d.audio.currentTime = ((e.clientX - r.left) / r.width) * d.audio.duration;
+}
+
+// ended listener — setup once
+// CRITICAL: only triggers auto-DJ when NO schedule owns this deck.
+// When a schedule is active on this deck, startNextShowTrack handles advancement.
+['A','B'].forEach(function(id) {
+  decks[id].audio.addEventListener('ended', function() {
+    ge('play' + id).textContent = '▶ PLAY';
+    ge('play' + id).classList.remove('on');
+    ge('panel' + id).style.boxShadow = '';
+    // Do NOT run auto-DJ if a scheduled show currently owns this deck
+    if (schedActive && showState.deck === id) return;
+    if (autoDJOn) runAutoDJ(id);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  AUTO-DJ
+// ─────────────────────────────────────────────────────────────────────────────
+function runAutoDJ(id) {
+  if (!queue.length) {
+    ge('adjDisplay').textContent = 'AUTO-DJ: QUEUE EMPTY';
+    return;
+  }
+  // Load onto OTHER deck, then crossfade to it
+  var targetDeck = (id === 'A') ? 'B' : 'A';
+  var next = queue.shift();
+  renderQueue();
+  ge('adjDisplay').textContent = 'AUTO-DJ: LOADING → DECK ' + targetDeck;
+
+  loadToDeck(targetDeck, next.file);
+
+  decks[targetDeck].audio.addEventListener('canplay', function onCanPlay() {
+    decks[targetDeck].audio.removeEventListener('canplay', onCanPlay);
+    initACX();
+    if (ACX.state === 'suspended') ACX.resume();
+    // Start playing the new deck
+    decks[targetDeck].audio.play()
+      .then(function() {
+        ge('play' + targetDeck).textContent = '❚❚ PAUSE';
+        ge('play' + targetDeck).classList.add('on');
+        ge('adjDisplay').textContent = 'AUTO-DJ ▶ DECK ' + targetDeck + ' — ' + noExt(next.name);
+        // Crossfade from current deck to new deck over 3s
+        autoCrossfadeTo(targetDeck, 3);
+      })
+      .catch(function(e) {
+        ge('adjDisplay').textContent = 'AUTO-DJ ERROR: ' + e.message;
+        toast('Auto-DJ error: ' + e.message);
+      });
+  }, { once: true });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  CROSSFADER
+// ─────────────────────────────────────────────────────────────────────────────
+function updateCrossfader() {
+  var v = parseFloat(ge('crossfader').value); // 0=full A, 1=full B
+  setSlider('crossfader', null, null);
+  // Equal-power crossfade
+  var gA = Math.cos(v * Math.PI / 2);
+  var gB = Math.cos((1 - v) * Math.PI / 2);
+  if (xfGainA) xfGainA.gain.setTargetAtTime(gA, ACX.currentTime, 0.05);
+  if (xfGainB) xfGainB.gain.setTargetAtTime(gB, ACX.currentTime, 0.05);
+  var label;
+  if      (v < 0.08) label = '◀ A';
+  else if (v > 0.92) label = 'B ▶';
+  else if (v < 0.42) label = 'A ▸';
+  else if (v > 0.58) label = '◂ B';
+  else               label = 'MIX';
+  ge('xfVal').textContent = label;
+}
+
+function autoCrossfadeTo(deck, dur) {
+  if (xfTimerID) clearInterval(xfTimerID);
+  var target = (deck === 'B') ? 1 : 0;
+  var start  = parseFloat(ge('crossfader').value);
+  var steps  = Math.round(dur * 30);
+  var step   = 0;
+  xfTimerID = setInterval(function() {
+    step++;
+    var v = start + (target - start) * (step / steps);
+    ge('crossfader').value = v;
+    updateCrossfader();
+    if (step >= steps) { clearInterval(xfTimerID); xfTimerID = null; }
+  }, 1000 / 30);
+  toast('X-FADE → DECK ' + deck + ' (' + dur + 's)');
+}
+
+ge('crossfader').addEventListener('input', function() {
+  if (!ACX) return;
+  updateCrossfader();
+});
+
+ge('btnAutoCrossfade').addEventListener('click', function() {
+  if (!ACX) { toast('Play a deck first'); return; }
+  // Crossfade to whichever deck is NOT currently dominant
+  var v = parseFloat(ge('crossfader').value);
+  autoCrossfadeTo(v < 0.5 ? 'B' : 'A', 3);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  MIC AUTO-DUCKING  (called each animation frame when mic is on)
+// ─────────────────────────────────────────────────────────────────────────────
+function processMicDuck() {
+  // Safety: if mic is off but music is still ducked, restore immediately
+  if (!micOn || !micDuckGain || !ACX) {
+    if (micDucking) hardResetMicDuck();
+    return;
+  }
+  // Only measure when ACX is running and the isolated detect node exists
+  if (!micDetect || ACX.state !== 'running') return;
+
+  // Read raw time-domain data from the ISOLATED detection analyser
+  // This path has NO connection to masterGain so there is zero feedback
+  var buf = new Float32Array(micDetect.fftSize);
+  try { micDetect.getFloatTimeDomainData(buf); } catch(e) { return; }
+
+  // RMS over whole buffer
+  var sum = 0;
+  for (var i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+  var rms = Math.sqrt(sum / buf.length);
+
+  var ind = ge('duckIndicator');
+
+  if (rms > MIC_GATE_THRESH) {
+    // Above gate = speech detected
+    micSpeakCount++;
+    micSilCount = 0;
+    if (!micDucking && micSpeakCount >= MIC_ONSET_FRAMES) {
+      micDucking = true;
+      micDuckGain.gain.cancelScheduledValues(ACX.currentTime);
+      micDuckGain.gain.setValueAtTime(micDuckGain.gain.value, ACX.currentTime);
+      micDuckGain.gain.linearRampToValueAtTime(MIC_DUCK_LEVEL, ACX.currentTime + 0.06);
+      if (ind) { ind.textContent = '🎤 AUTO-DUCK: ACTIVE'; ind.classList.add('active'); }
+    }
+  } else {
+    // Below gate = silence
+    micSilCount++;
+    micSpeakCount = 0;
+    if (micDucking && micSilCount >= MIC_RELEASE_FRAMES) {
+      micDucking = false;
+      micSilCount = 0;
+      micDuckGain.gain.cancelScheduledValues(ACX.currentTime);
+      micDuckGain.gain.setValueAtTime(micDuckGain.gain.value, ACX.currentTime);
+      micDuckGain.gain.linearRampToValueAtTime(1.0, ACX.currentTime + 0.4);
+      if (ind) { ind.textContent = 'AUTO-DUCK: STANDBY'; ind.classList.remove('active'); }
+    }
+  }
+}
+
+// Safe helper: cancel pending automations then ramp to target
+function setMicDuckGainSafe(target, rampSec) {
+  if (!micDuckGain || !ACX) return;
+  micDuckGain.gain.cancelScheduledValues(ACX.currentTime);
+  micDuckGain.gain.setValueAtTime(micDuckGain.gain.value, ACX.currentTime);
+  micDuckGain.gain.linearRampToValueAtTime(target, ACX.currentTime + (rampSec || 0.1));
+}
+
+// Hard reset: forces micDuckGain back to 1.0 immediately — the safety net
+function hardResetMicDuck() {
+  micDucking    = false;
+  micSpeakCount = 0;
+  micSilCount   = 0;
+  var ind = ge('duckIndicator');
+  if (ind) { ind.textContent = 'AUTO-DUCK: STANDBY'; ind.classList.remove('active'); }
+  if (!micDuckGain || !ACX) return;
+  micDuckGain.gain.cancelScheduledValues(ACX.currentTime);
+  micDuckGain.gain.setValueAtTime(1.0, ACX.currentTime);
+}
+
+function toggleMic() {
+  if (!micGain) { setupMic(); return; }
+  micOn = !micOn;
+  var btn = ge('btnMicOn');
+  var st  = ge('micStatus');
+  if (micOn) {
+    // Always start clean — never go live while ducked
+    hardResetMicDuck();
+    // Connect output path: micAnal (which sits after micGain) → masterGain
+    try { micAnal.connect(masterGain); } catch(e) {}
+    st.textContent = 'MIC: 🔴 LIVE'; st.className = 'mic-status ok';
+    btn.textContent = '🔇 MIC OFF';
+    btn.style.background = 'var(--g)'; btn.style.color = 'var(--bg)'; btn.style.borderColor = 'var(--g)';
+  } else {
+    // Disconnect mic output — silence it immediately
+    try { micAnal.disconnect(masterGain); } catch(e) {}
+    st.textContent = 'MIC: READY'; st.className = 'mic-status ok';
+    btn.textContent = '🎤 MIC ON';
+    btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
+    // Hard reset: restore music to full volume, clear all counters
+    hardResetMicDuck();
+    // NOTE: we do NOT stop micStream tracks here — stopping and restarting
+    // the stream causes permission prompts again. The stream stays alive but
+    // disconnected from the graph. The OS audio session stays in media mode
+    // because of the getUserMedia constraints set above.
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+function duckForJingle(active) {
+  // Used by cartwall — harder and faster duck
+  if (!jingleDuckGain || !ACX) return;
+  var target = active ? 0.35 : 1.0;
+  var ramp   = active ? 0.05 : 0.25;
+  jingleDuckGain.gain.cancelScheduledValues(ACX.currentTime);
+  jingleDuckGain.gain.setValueAtTime(jingleDuckGain.gain.value, ACX.currentTime);
+  jingleDuckGain.gain.linearRampToValueAtTime(target, ACX.currentTime + ramp);
+}
+
+function duckForAd() {
+  // Used by ad/promo overlay — gentle, music stays audible underneath
+  if (!jingleDuckGain || !ACX) return;
+  jingleDuckGain.gain.cancelScheduledValues(ACX.currentTime);
+  jingleDuckGain.gain.setValueAtTime(jingleDuckGain.gain.value, ACX.currentTime);
+  jingleDuckGain.gain.linearRampToValueAtTime(AD_DUCK_LEVEL, ACX.currentTime + AD_DUCK_RAMP);
+}
+
+function restoreFromAd() {
+  // Restore music after ad overlay — slow, graceful fade back up
+  if (!jingleDuckGain || !ACX) return;
+  jingleDuckGain.gain.cancelScheduledValues(ACX.currentTime);
+  jingleDuckGain.gain.setValueAtTime(jingleDuckGain.gain.value, ACX.currentTime);
+  jingleDuckGain.gain.linearRampToValueAtTime(1.0, ACX.currentTime + AD_RESTORE_RAMP);
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  DECK FADERS
+// ─────────────────────────────────────────────────────────────────────────────
+ge('volA').addEventListener('input', function() {
+  setSlider('volA', 'volAd', pct);
+  decks.A.audio.volume = +this.value;
+});
+ge('volB').addEventListener('input', function() {
+  setSlider('volB', 'volBd', pct);
+  decks.B.audio.volume = +this.value;
+});
+ge('rateA').addEventListener('input', function() {
+  setSlider('rateA', 'rateAd', function(v) { return v.toFixed(2) + 'x'; });
+  decks.A.audio.playbackRate = +this.value;
+});
+ge('rateB').addEventListener('input', function() {
+  setSlider('rateB', 'rateBd', function(v) { return v.toFixed(2) + 'x'; });
+  decks.B.audio.playbackRate = +this.value;
+});
+ge('masterVol').addEventListener('input', function() {
+  setSlider('masterVol', 'masterVold', pct);
+  if (masterGain) masterGain.gain.value = +this.value;
+  // Also apply to raw audio elements as backup
+  ['A','B'].forEach(function(id) { decks[id].audio.volume = +ge('vol'+id).value * +this.value; }.bind(this));
+});
+ge('micVol').addEventListener('input', function() {
+  setSlider('micVol', 'micVold', pct);
+  if (micGain) micGain.gain.value = +this.value;
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  DSP CHAIN  — True bypass architecture
+//
+//  DEFAULT (all off):  srcNode → analNode → xfGain   (zero processing)
+//  When pills enabled: srcNode → [only active nodes] → analNode → xfGain
+//
+//  Rules:
+//  - Nodes are only wired INTO the path when their pill is ON
+//  - When a pill turns OFF the whole chain is rewired from scratch
+//  - DynamicsCompressor and WaveShaper are NEVER left in path at "bypass" settings
+//    because they process even at ratio=1 / straight curve
+// ─────────────────────────────────────────────────────────────────────────────
+var eqNodes = {
+  A: { bass: null, mid: null, treb: null, comp: null, clip: null, limit: null, limitTrim: null },
+  B: { bass: null, mid: null, treb: null, comp: null, clip: null, limit: null, limitTrim: null }
+};
+
+function makeSoftClipCurve(amount) {
+  var n = 256, curve = new Float32Array(n);
+  for (var i = 0; i < n; i++) {
+    var x = (i * 2) / n - 1;
+    curve[i] = (Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
+  }
+  return curve;
+}
+
+// Lazily create nodes for a deck — only called when first needed
+function ensureEQNodes(id) {
+  if (!ACX) return false;
+  var eq = eqNodes[id];
+  if (!eq.bass) {
+    eq.bass = ACX.createBiquadFilter();
+    eq.bass.type = 'lowShelf'; eq.bass.frequency.value = 200;
+
+    eq.mid = ACX.createBiquadFilter();
+    eq.mid.type = 'peaking'; eq.mid.frequency.value = 1000; eq.mid.Q.value = 0.8;
+
+    eq.treb = ACX.createBiquadFilter();
+    eq.treb.type = 'highShelf'; eq.treb.frequency.value = 4000;
+
+    eq.comp = ACX.createDynamicsCompressor();
+    eq.comp.knee.value = 8; eq.comp.attack.value = 0.01; eq.comp.release.value = 0.25;
+
+    eq.clip = ACX.createWaveShaper();
+    eq.clip.oversample = 'none'; // NO oversampling — avoids resampling artifacts
+
+    eq.limit = ACX.createDynamicsCompressor();
+    // True brick wall: zero knee, fastest attack, high ratio
+    eq.limit.knee.value      = 0;
+    eq.limit.attack.value    = 0.001;  // 1ms attack — catches transients
+    eq.limit.release.value   = 0.1;    // 100ms release
+    eq.limit.ratio.value     = 20;     // near-brick-wall
+    // limitTrim: compensates for the compressor's internal automatic makeup gain
+    // DynamicsCompressor always applies makeup — we subtract it back so the
+    // limiter REDUCES peaks rather than boosting them
+    eq.limitTrim = ACX.createGain();
+    eq.limitTrim.gain.value = 0.89; // ~-1dB trim to counteract makeup
+  }
+  return true;
+}
+
+// Rewire the entire chain for one deck based on current dspEnabled state.
+// Called every time any pill toggles or slider changes.
+function rewireChain(id) {
+  if (!ACX) return;
+  var d  = decks[id];
+  var eq = eqNodes[id];
+  if (!d.srcNode || !d.analNode) return;
+
+  // 1. Disconnect everything to start clean
+  var allNodes = [d.srcNode, d.analNode];
+  if (eq.bass)  allNodes.push(eq.bass, eq.mid, eq.treb);
+  if (eq.comp)  allNodes.push(eq.comp);
+  if (eq.clip)  allNodes.push(eq.clip);
+  if (eq.limit)     allNodes.push(eq.limit);
+  if (eq.limitTrim) allNodes.push(eq.limitTrim);
+
+  allNodes.forEach(function(n) {
+    try { n.disconnect(); } catch(e) {}
+  });
+
+  // 2. Build the active chain — only nodes whose pill is ON
+  var chain = [d.srcNode];
+
+  if (dspEnabled.bass || dspEnabled.mid || dspEnabled.treb) {
+    ensureEQNodes(id);
+    // Update values before inserting
+    eq.bass.gain.value = dspEnabled.bass ? +ge('dspBass').value : 0;
+    eq.mid.gain.value  = dspEnabled.mid  ? +ge('dspMid').value  : 0;
+    eq.treb.gain.value = dspEnabled.treb ? +ge('dspTreb').value : 0;
+    chain.push(eq.bass, eq.mid, eq.treb);
+  }
+
+  if (dspEnabled.comp) {
+    ensureEQNodes(id);
+    eq.comp.threshold.value = +ge('dspComp').value;
+    eq.comp.ratio.value     = 4;
+    chain.push(eq.comp);
+  }
+
+  if (dspEnabled.clip) {
+    ensureEQNodes(id);
+    eq.clip.curve = makeSoftClipCurve(+ge('dspClipAmt').value);
+    chain.push(eq.clip);
+  }
+
+  if (dspEnabled.limit) {
+    ensureEQNodes(id);
+    var limitThr = +ge('dspLimitThr').value;
+    eq.limit.threshold.value = limitThr;
+    eq.limit.ratio.value     = 20;    // brick wall
+    eq.limit.knee.value      = 0;
+    eq.limit.attack.value    = 0.001;
+    eq.limit.release.value   = 0.1;
+    // Trim gain counteracts Web Audio's built-in makeup gain:
+    // At high ratios the makeup is approximately -threshold/ratio, roughly 1-2dB.
+    // We set a fixed -1.5dB trim which keeps output below input at all threshold values.
+    eq.limitTrim.gain.value  = 0.84;  // -1.5dB — limiter NEVER raises volume
+    chain.push(eq.limit, eq.limitTrim);
+  }
+
+  chain.push(d.analNode);
+
+  // 3. Wire chain links in order
+  for (var i = 0; i < chain.length - 1; i++) {
+    chain[i].connect(chain[i + 1]);
+  }
+
+  // 4. analNode must reconnect to its xfGain output
+  d.analNode.connect(id === 'A' ? xfGainA : xfGainB);
+}
+
+function applyDSP() {
+  ['A', 'B'].forEach(function(id) { rewireChain(id); });
+}
+
+ge('dspBass').addEventListener('input', function() { setSlider('dspBass','dspBassd',sgn); applyDSP(); });
+ge('dspMid').addEventListener('input',  function() { setSlider('dspMid','dspMidd',sgn);   applyDSP(); });
+ge('dspTreb').addEventListener('input', function() { setSlider('dspTreb','dspTrebd',sgn); applyDSP(); });
+ge('dspComp').addEventListener('input', function() { setSlider('dspComp','dspCompd',function(v){return v;}); applyDSP(); });
+ge('dspClipAmt').addEventListener('input', function() { setSlider('dspClipAmt','dspClipAmtd',function(v){return v;}); applyDSP(); });
+ge('dspLimitThr').addEventListener('input', function() { setSlider('dspLimitThr','dspLimitThrd',function(v){return v+'dB';}); applyDSP(); });
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  DSP PILLS
+// ─────────────────────────────────────────────────────────────────────────────
+function buildPills() {
+  var row = ge('pillRow');
+  row.innerHTML = '';
+  pillDefs.forEach(function(p) {
+    var span = document.createElement('span');
+    span.className = 'pill' + (dspEnabled[p.key] ? ' on' : '');
+    span.textContent = p.label;
+    span.addEventListener('click', function() {
+      dspEnabled[p.key] = !dspEnabled[p.key];
+      span.classList.toggle('on', dspEnabled[p.key]);
+      applyDSP();
+      saveSettings();
+      toast(p.label + ': ' + (dspEnabled[p.key] ? 'ON' : 'OFF'));
+    });
+    row.appendChild(span);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  TRANSPORT WIRING
+// ─────────────────────────────────────────────────────────────────────────────
+ge('loadA').addEventListener('click', function() { ge('fileA').click(); });
+ge('loadB').addEventListener('click', function() { ge('fileB').click(); });
+ge('playA').addEventListener('click', function() { togglePlay('A'); });
+ge('playB').addEventListener('click', function() { togglePlay('B'); });
+ge('stopA').addEventListener('click', function() { stopDeck('A'); });
+ge('stopB').addEventListener('click', function() { stopDeck('B'); });
+ge('cueSetA').addEventListener('click', function() { decks.A.cue = decks.A.audio.currentTime; toast('Deck A CUE @ ' + fmtT(decks.A.cue)); });
+ge('cueSetB').addEventListener('click', function() { decks.B.cue = decks.B.audio.currentTime; toast('Deck B CUE @ ' + fmtT(decks.B.cue)); });
+ge('cueGoA').addEventListener('click', function() { decks.A.audio.currentTime = decks.A.cue; });
+ge('cueGoB').addEventListener('click', function() { decks.B.audio.currentTime = decks.B.cue; });
+ge('progA').addEventListener('click', function(e) { seekDeck('A', e); });
+ge('progB').addEventListener('click', function(e) { seekDeck('B', e); });
+ge('wfZoneA').addEventListener('click', function(e) { seekDeck('A', e); });
+ge('wfZoneB').addEventListener('click', function(e) { seekDeck('B', e); });
+
+ge('fileA').addEventListener('change', function(e) {
+  if (e.target.files[0]) loadToDeck('A', e.target.files[0]);
+  this.value = '';
+});
+ge('fileB').addEventListener('change', function(e) {
+  if (e.target.files[0]) loadToDeck('B', e.target.files[0]);
+  this.value = '';
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  MICROPHONE
+// ─────────────────────────────────────────────────────────────────────────────
+function setupMic() {
+  initACX();
+  var st = ge('micStatus');
+  st.textContent = 'MIC: REQUESTING PERMISSION...';
+  st.className = 'mic-status warn';
+  // These constraints are critical on mobile/tablet.
+  // Disabling echoCancellation, noiseSuppression and autoGainControl
+  // prevents the OS from switching the audio session to "communication mode",
+  // which on Android/iOS hijacks volume keys and lowers media volume.
+  var micConstraints = {
+    audio: {
+      echoCancellation: false,
+      noiseSuppression: false,
+      autoGainControl:  false,
+      channelCount: 1,
+      latency: 0
+    },
+    video: false
+  };
+  navigator.mediaDevices.getUserMedia(micConstraints)
+    .then(function(stream) {
+      // Stop any previous stream
+      if (micStream) { micStream.getTracks().forEach(function(t){ t.stop(); }); }
+      micStream = stream;
+
+      var src = ACX.createMediaStreamSource(stream);
+
+      // ── OUTPUT PATH: src → micGain → (masterGain when live) ──────────────
+      micGain = ACX.createGain();
+      micGain.gain.value = +ge('micVol').value;
+      // micGain does NOT connect to masterGain here — only connects on MIC ON
+
+      // ── VU METER ANALYSER: on the output path after gain ─────────────────
+      micAnal = ACX.createAnalyser();
+      micAnal.fftSize = 256;
+      micAnal.smoothingTimeConstant = 0.6;
+      src.connect(micGain);
+      // micGain → micAnal (so VU meter works)
+      // micAnal → masterGain only when mic is ON (see toggleMic)
+      micGain.connect(micAnal);
+
+      // ── SPEECH DETECTION PATH: completely isolated, no output connection ──
+      // src → micHPF → micDetect
+      // This path NEVER connects to masterGain — zero feedback risk
+      micHPF = ACX.createBiquadFilter();
+      micHPF.type = 'highpass';
+      micHPF.frequency.value = 120;  // cut DC offset, mains hum, low rumble
+      micHPF.Q.value = 0.7;
+
+      micDetect = ACX.createAnalyser();
+      micDetect.fftSize = 2048;
+      micDetect.smoothingTimeConstant = 0;  // raw — no smoothing lag
+
+      src.connect(micHPF);
+      micHPF.connect(micDetect);
+      // micDetect deliberately NOT connected to anything — detection only
+
+      // Ensure music volume is fully restored — never start ducked
+      hardResetMicDuck();
+      micOn = false;
+      st.textContent = 'MIC: READY — press MIC ON';
+      st.className = 'mic-status ok';
+      var btn = ge('btnMicOn');
+      btn.textContent = '🎤 MIC ON';
+      btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
+      toast('✔ Microphone ready');
+    })
+    .catch(function(e) {
+      st.textContent = 'MIC ERROR: ' + e.message;
+      st.className = 'mic-status err';
+      toast('Mic error: ' + e.message);
+    });
+}
+
+ge('btnMicOn').addEventListener('click', toggleMic);
+
+// Release mic stream on page close so OS returns to normal audio session
+window.addEventListener('beforeunload', function() {
+  if (micStream) { micStream.getTracks().forEach(function(t){ t.stop(); }); }
+});
+ge('btnMicReconnect').addEventListener('click', setupMic);
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  CARTWALL
+// ─────────────────────────────────────────────────────────────────────────────
+function buildCartwall() {
+  var g = ge('cartGrid');
+  g.innerHTML = '';
+  for (var i = 0; i < 4; i++) {
+    (function(idx) {
+      var item = document.createElement('div');
+      item.className = 'cart-item';
+
+      var playBtn = document.createElement('button');
+      playBtn.className = 'cart-play-btn';
+      playBtn.id = 'cartPlay' + idx;
+      playBtn.textContent = cartEmoji[idx] + ' ' + cartNames[idx];
+      playBtn.addEventListener('click', function() { playCart(idx); });
+
+      var fileBtn = document.createElement('button');
+      fileBtn.className = 'cart-file-btn';
+      fileBtn.textContent = '📂 LOAD FILE';
+      fileBtn.addEventListener('click', function() { ge('cart' + idx).click(); });
+
+      item.appendChild(playBtn);
+      item.appendChild(fileBtn);
+      g.appendChild(item);
+    })(i);
+  }
+}
+
+function playCart(idx) {
+  if (!cartFiles[idx]) { toast('Load a file into Cart slot ' + (idx+1) + ' first!'); return; }
+  var btn = ge('cartPlay' + idx);
+  if (cartAudios[idx] && !cartAudios[idx].paused) {
+    cartAudios[idx].pause();
+    cartAudios[idx].currentTime = 0;
+    btn.classList.remove('on');
+    duckForJingle(false); // restore music
+    return;
+  }
+  var a = new Audio(URL.createObjectURL(cartFiles[idx]));
+  cartAudios[idx] = a;
+  a.volume = +ge('masterVol').value;
+  // Duck the music while jingle plays
+  duckForJingle(true);
+  a.play().catch(function(e) { toast('Cart error: ' + e.message); });
+  btn.classList.add('on');
+  toast('▶ ' + cartNames[idx]);
+  a.addEventListener('ended', function() {
+    btn.classList.remove('on');
+    duckForJingle(false); // restore music after jingle ends
+  }, { once: true });
+}
+
+for (var ci = 0; ci < 4; ci++) {
+  (function(idx) {
+    ge('cart' + idx).addEventListener('change', function(e) {
+      var f = e.target.files[0]; if (!f) return;
+      cartFiles[idx] = f;
+      // Save cart file to IndexedDB
+      saveCartFileToDB(idx, f);
+      saveCartMeta();
+      // Clear cached duration so it gets re-probed
+      window['cartDur_' + idx] = 0;
+      // Probe and cache new duration, then refresh time meter if a show is selected
+      probeCartDur(idx, function(dur) {
+        window['cartDur_' + idx] = dur;
+        if (schedSelIdx >= 0) updateTimeMeter(SHOWS[schedSelIdx]);
+      });
+      ge('cartPlay' + idx).textContent = cartEmoji[idx] + ' ' + noExt(f.name).slice(0, 13) + (f.name.length > 16 ? '…' : '');
+      toast('Cart ' + (idx+1) + ': ' + f.name);
+      this.value = '';
+    });
+  })(ci);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  ON AIR
+// ─────────────────────────────────────────────────────────────────────────────
+ge('btnOnAir').addEventListener('click', function() {
+  ge('onAirBadge').textContent = '🔴 ON AIR'; ge('onAirBadge').classList.add('live');
+  ge('streamDot').classList.add('live'); ge('streamTxt').textContent = 'STREAMING LIVE';
+  ge('streamTxt').style.color = 'var(--red)';
+  toast('🔴 NOW LIVE — ON AIR');
+});
+ge('btnOffAir').addEventListener('click', function() {
+  ge('onAirBadge').textContent = '⚪ OFF AIR'; ge('onAirBadge').classList.remove('live');
+  ge('streamDot').classList.remove('live'); ge('streamTxt').textContent = 'OFFLINE';
+  ge('streamTxt').style.color = '';
+  toast('Stream ended');
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  QUEUE
+// ─────────────────────────────────────────────────────────────────────────────
+function addToQueue(idx) {
+  var t = lib[idx]; if (!t) return;
+  queue.push({ file: t.file, name: t.name });
+  saveQueue();
+  renderQueue();
+  toast('Queued: ' + noExt(t.name));
+}
+
+function renderQueue() {
+  var ul = ge('queueList');
+  if (!queue.length) { ul.innerHTML = '<li class="q-empty">Queue empty</li>'; return; }
+  ul.innerHTML = '';
+  queue.forEach(function(t, i) {
+    var li = document.createElement('li');
+    if (i === 0) li.classList.add('active');
+    li.title = 'Click ✕ to remove';
+
+    var qn = document.createElement('span');
+    qn.className = 'q-name';
+    qn.textContent = noExt(t.name);
+
+    var qrm = document.createElement('button');
+    qrm.className = 'q-rm-btn';
+    qrm.textContent = '✕';
+    qrm.title = 'Remove from queue';
+    qrm.addEventListener('click', (function(n) {
+      return function(e) { e.stopPropagation(); queue.splice(n, 1); saveQueue(); renderQueue(); };
+    })(i));
+
+    li.appendChild(qn);
+    li.appendChild(qrm);
+    ul.appendChild(li);
+  });
+}
+
+// ── EJECT BUTTONS ─────────────────────────────────────────────────────────────
+function ejectDeck(id) {
+  var d = decks[id];
+  // Stop playback
+  try { d.audio.pause(); } catch(e) {}
+  d.audio.removeAttribute('src');
+  d.audio.load();
+  // Revoke blob URL
+  if (d.objURL) { URL.revokeObjectURL(d.objURL); d.objURL = null; }
+  d.file = null;
+  // Reset UI
+  ge('name'+id).textContent = '— NO FILE LOADED —';
+  ge('time'+id).textContent = '00:00 / 00:00';
+  ge('fill'+id).style.width = '0%';
+  ge('head'+id).style.left  = '0%';
+  ge('play'+id).textContent = id==='A' ? '▶ PLAY' : '▶ PLAY';
+  ge('play'+id).classList.remove('on');
+  // Clear waveform canvas
+  var cv = ge('wf'+id); if (cv) { var ctx=cv.getContext('2d'); ctx.clearRect(0,0,cv.width,cv.height); }
+  markLibItems();
+  toast('Deck '+id+' ejected');
+}
+ge('ejectA').addEventListener('click', function() { ejectDeck('A'); });
+ge('ejectB').addEventListener('click', function() { ejectDeck('B'); });
+
+ge('btnClearQ').addEventListener('click', function() { queue = []; saveQueue(); renderQueue(); toast('Queue cleared'); });
+ge('btnShuffleQ').addEventListener('click', function() {
+  for (var i = queue.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = queue[i]; queue[i] = queue[j]; queue[j] = tmp;
+  }
+  saveQueue(); renderQueue(); toast('Queue shuffled');
+});
+ge('btnAutoDJ').addEventListener('click', function() {
+  autoDJOn = !autoDJOn;
+  this.textContent = 'AUTO-DJ: ' + (autoDJOn ? 'ON' : 'OFF');
+  this.style.color = autoDJOn ? '#5050aa' : '#883030';
+  ge('adjDisplay').textContent = 'AUTO-DJ: ' + (autoDJOn ? 'ON — STANDBY' : 'DISABLED');
+  saveSettings();
+  toast('Auto-DJ ' + (autoDJOn ? 'enabled' : 'disabled'));
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  LIBRARY
+// ─────────────────────────────────────────────────────────────────────────────
+ge('btnImport').addEventListener('click', function() { ge('fileLib').click(); });
+ge('btnClearLib').addEventListener('click', function() {
+  if (confirm('Clear the library?')) { lib = []; saveLibMeta(); renderLib(); toast('Library cleared'); }
+});
+ge('libSearch').addEventListener('input', function() { renderLib(this.value); });
+
+ge('fileLib').addEventListener('change', async function(e) {
+  var files = Array.from(e.target.files);
+  var added = 0;
+  for (var i = 0; i < files.length; i++) {
+    var f = files[i];
+    if (lib.some(function(x) { return x.name === f.name; })) continue;
+    var dur = await getDuration(f);
+    lib.push({ file: f, name: f.name, dur: dur });
+    // Save to IndexedDB immediately
+    saveLibFileToDB(lib.length-1, f, dur);
+    added++;
+  }
+  saveLibMeta();
+  renderLib();
+  toast('Imported ' + added + ' track' + (added !== 1 ? 's' : ''));
+  this.value = '';
+});
+
+function getDuration(file) {
+  return new Promise(function(resolve) {
+    var a = new Audio();
+    var url = URL.createObjectURL(file);
+    a.src = url;
+    a.onloadedmetadata = function() { URL.revokeObjectURL(url); resolve(a.duration || 0); };
+    a.onerror = function() { URL.revokeObjectURL(url); resolve(0); };
+  });
+}
+
+function renderLib(filter) {
+  filter = filter || '';
+  var grid = ge('libGrid');
+  var q = filter.toLowerCase();
+  var items = lib.filter(function(t) { return t.name.toLowerCase().indexOf(q) >= 0; });
+  ge('libCount').textContent = lib.length + ' track' + (lib.length !== 1 ? 's' : '');
+  if (!items.length) {
+    grid.innerHTML = '<div class="lib-empty">' + (filter ? 'No results for "' + filter + '"' : 'No tracks — click IMPORT FILES') + '</div>';
+    return;
+  }
+  grid.innerHTML = '';
+  items.forEach(function(t) {
+    var idx = lib.indexOf(t);
+    var div = document.createElement('div');
+    div.className = 'lib-track';
+    div.dataset.name = t.name;
+
+    var note = document.createElement('span');
+    note.style.cssText = 'color:var(--gd);font-size:.46rem;flex-shrink:0';
+    note.textContent = '♫';
+
+    var tn = document.createElement('span');
+    tn.className = 'tn';
+    tn.textContent = noExt(t.name);
+
+    var td = document.createElement('span');
+    td.className = 'td';
+    td.textContent = fmtT(t.dur);
+
+    var rm = document.createElement('button');
+    rm.className = 'lib-rm-btn';
+    rm.textContent = '✕';
+    rm.title = 'Remove from library';
+    rm.addEventListener('click', (function(libIdx) {
+      return function(e) {
+        e.stopPropagation();
+        lib.splice(libIdx, 1);
+        saveLibMeta();
+        renderLib(ge('libSearch').value);
+        toast('Removed: ' + noExt(t.name));
+      };
+    })(idx));
+
+    div.appendChild(note);
+    div.appendChild(tn);
+    div.appendChild(td);
+    div.appendChild(rm);
+
+    div.title = 'Click: queue | Dbl-click: Deck A | Right-click: Deck B';
+    div.addEventListener('click',       function() { addToQueue(idx); });
+    div.addEventListener('dblclick',    function() { loadToDeck('A', t.file); });
+    div.addEventListener('contextmenu', function(e) { e.preventDefault(); loadToDeck('B', t.file); });
+    grid.appendChild(div);
+  });
+  markLibItems();
+}
+
+function markLibItems() {
+  document.querySelectorAll('.lib-track').forEach(function(el) {
+    var n = el.dataset.name;
+    el.classList.toggle('on-a', !!(decks.A.file && decks.A.file.name === n));
+    el.classList.toggle('on-b', !!(decks.B.file && decks.B.file.name === n));
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  WAVEFORM
+// ─────────────────────────────────────────────────────────────────────────────
+function drawWaveform(id, file) {
+  var zone   = ge('wfZone' + id);
+  var canvas = ge('wf' + id);
+  var W = zone.offsetWidth || 300, H = 34;
+  canvas.width = W; canvas.height = H;
+  var ctx = canvas.getContext('2d');
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var tmp = new (window.AudioContext || window.webkitAudioContext)();
+    tmp.decodeAudioData(ev.target.result.slice(0), function(buf) {
+      var data = buf.getChannelData(0);
+      var step = Math.ceil(data.length / W);
+      ctx.clearRect(0, 0, W, H);
+      ctx.strokeStyle = id === 'A' ? '#4dff7c' : '#3ab0e8';
+      ctx.lineWidth = 1; ctx.globalAlpha = 0.6;
+      for (var x = 0; x < W; x++) {
+        var mn = 0, mx = 0;
+        for (var j = 0; j < step; j++) {
+          var s = data[x * step + j] || 0;
+          if (s < mn) mn = s; if (s > mx) mx = s;
+        }
+        ctx.beginPath();
+        ctx.moveTo(x, ((1 + mn) / 2) * H);
+        ctx.lineTo(x, ((1 + mx) / 2) * H);
+        ctx.stroke();
+      }
+      tmp.close();
+    }, function() { tmp.close(); });
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  VU METERS
+// ─────────────────────────────────────────────────────────────────────────────
+function getPeak(anal) {
+  if (!anal) return 0;
+  var buf = new Float32Array(anal.fftSize);
+  try { anal.getFloatTimeDomainData(buf); } catch(e) { return 0; }
+  var peak = 0;
+  for (var i = 0; i < buf.length; i++) { var v = Math.abs(buf[i]); if (v > peak) peak = v; }
+  return Math.min(peak, 1);
+}
+
+function drawVU(canvasId, level) {
+  var cv = ge('vu' + canvasId); if (!cv) return;
+  var c = cv.getContext('2d'), W = cv.width, H = cv.height;
+  c.clearRect(0, 0, W, H);
+  var N = 40, sw = Math.max(1, Math.floor(W / N) - 1);
+  for (var i = 0; i < N; i++) {
+    var f = i / N;
+    var on = f <= level;
+    var r, g, b;
+    if (f < 0.6)      { r=0;   g=220; b=60;  }
+    else if (f < 0.85){ r=255; g=165; b=0;   }
+    else              { r=255; g=40;  b=40;  }
+    c.fillStyle = on ? ('rgb('+r+','+g+','+b+')') : ('rgba('+r+','+g+','+b+',.06)');
+    if (on) { c.shadowColor = 'rgb('+r+','+g+','+b+')'; c.shadowBlur = 3; }
+    else    { c.shadowBlur  = 0; }
+    c.fillRect(i * (W / N), 0, sw, H);
+  }
+  c.shadowBlur = 0;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  MAIN ANIMATION LOOP
+// ─────────────────────────────────────────────────────────────────────────────
+function loop() {
+  // VU meters
+  ['A', 'B'].forEach(function(id) {
+    var level = getPeak(decks[id].analNode);
+    vu[id] = vu[id] * 0.7 + level * 0.3;
+    drawVU(id, Math.min(vu[id] * 1.6, 1));
+  });
+  var mLevel = getPeak(micAnal);
+  vu.mic = vu.mic * 0.7 + mLevel * 0.3;
+  drawVU('Mic', Math.min(vu.mic * 2, 1));
+
+  // Progress bars, time display, playhead
+  ['A', 'B'].forEach(function(id) {
+    var d   = decks[id];
+    var dur = d.audio.duration || 0;
+    var cur = d.audio.currentTime || 0;
+    var p   = dur ? (cur / dur * 100) : 0;
+    ge('fill' + id).style.width = p + '%';
+    ge('head' + id).style.left  = p + '%';
+    ge('time' + id).textContent = fmtT(cur) + ' / ' + fmtT(dur);
+    var rem = dur - cur;
+    ge('panel' + id).style.boxShadow = (!d.audio.paused && rem > 0 && rem < 10) ? '0 0 14px rgba(255,170,0,.18)' : '';
+  });
+
+  // Mic auto-ducking
+  processMicDuck();
+  processAdOverlay(); // Check for quiet passage to fire pending ad overlay
+
+  requestAnimationFrame(loop);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  CLOCK
+// ─────────────────────────────────────────────────────────────────────────────
+var DAYS  = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+var MONS  = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+function tickClock() {
+  var n = new Date();
+  var t = zp(n.getHours()) + ':' + zp(n.getMinutes()) + ':' + zp(n.getSeconds());
+  ge('clockDisplay').textContent = t;
+  ge('headerClock').textContent  = t;
+  ge('dateDisplay').textContent  = DAYS[n.getDay()] + ' ' + n.getDate() + ' ' + MONS[n.getMonth()] + ' ' + n.getFullYear();
+  checkScheduler();
+  // Watchdog: if mic is OFF but duck gain is below 0.99, restore it
+  if (!micOn && micDuckGain && ACX && micDuckGain.gain.value < 0.99) {
+    hardResetMicDuck();
+  }
+}
+setInterval(tickClock, 1000); tickClock();
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  INITIALISE ALL SLIDERS (set CSS fill on page load)
+// ─────────────────────────────────────────────────────────────────────────────
+[
+  ['volA','volAd',pct], ['volB','volBd',pct],
+  ['rateA','rateAd',function(v){return v.toFixed(2)+'x';}],
+  ['rateB','rateBd',function(v){return v.toFixed(2)+'x';}],
+  ['micVol','micVold',pct], ['masterVol','masterVold',pct],
+  ['dspBass','dspBassd',sgn], ['dspMid','dspMidd',sgn],
+  ['dspTreb','dspTrebd',sgn], ['dspComp','dspCompd',function(v){return v;}],
+  ['crossfader',null,null],
+  ['dspClipAmt','dspClipAmtd',function(v){return v;}],
+  ['dspLimitThr','dspLimitThrd',function(v){return v+'dB';}]
+].forEach(function(row) { setSlider(row[0], row[1], row[2]); });
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  PERSISTENCE  —  everything saved, everything restored
+//  • IndexedDB  : lib files, cart files, queue file refs
+//  • localStorage: all settings, sliders, DSP pills, cart names/emoji, SHOWS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+var DB = null;
+var DB_NAME = 'eyethuProDB';
+var DB_VER  = 2;
+var DB_STORE_FILES = 'files';   // key: string id, value: {id, blob, name, dur}
+
+function openDB(cb) {
+  if (DB) { cb(DB); return; }
+  var req = indexedDB.open(DB_NAME, DB_VER);
+  req.onupgradeneeded = function(e) {
+    var db = e.target.result;
+    if (!db.objectStoreNames.contains(DB_STORE_FILES)) {
+      db.createObjectStore(DB_STORE_FILES, { keyPath: 'id' });
+    }
+  };
+  req.onsuccess = function(e) { DB = e.target.result; cb(DB); };
+  req.onerror   = function()  { cb(null); };
+}
+
+function dbPut(id, blob, name, dur, cb) {
+  openDB(function(db) {
+    if (!db) { if(cb) cb(); return; }
+    var tx = db.transaction(DB_STORE_FILES, 'readwrite');
+    tx.objectStore(DB_STORE_FILES).put({ id:id, blob:blob, name:name, dur:dur||0 });
+    tx.oncomplete = function() { if(cb) cb(); };
+    tx.onerror    = function() { if(cb) cb(); };
+  });
+}
+
+function dbGet(id, cb) {
+  openDB(function(db) {
+    if (!db) { cb(null); return; }
+    var req = db.transaction(DB_STORE_FILES, 'readonly')
+                .objectStore(DB_STORE_FILES).get(id);
+    req.onsuccess = function() { cb(req.result || null); };
+    req.onerror   = function() { cb(null); };
+  });
+}
+
+function dbGetAll(prefix, cb) {
+  openDB(function(db) {
+    if (!db) { cb([]); return; }
+    var results = [];
+    var req = db.transaction(DB_STORE_FILES, 'readonly')
+                .objectStore(DB_STORE_FILES).openCursor();
+    req.onsuccess = function(e) {
+      var cursor = e.target.result;
+      if (cursor) {
+        if (!prefix || cursor.key.indexOf(prefix) === 0) results.push(cursor.value);
+        cursor.continue();
+      } else { cb(results); }
+    };
+    req.onerror = function() { cb([]); };
+  });
+}
+
+function dbDelete(id, cb) {
+  openDB(function(db) {
+    if (!db) { if(cb) cb(); return; }
+    var tx = db.transaction(DB_STORE_FILES, 'readwrite');
+    tx.objectStore(DB_STORE_FILES).delete(id);
+    tx.oncomplete = function() { if(cb) cb(); };
+  });
+}
+
+// ── Settings: save/restore all sliders + toggles to localStorage ──────────────
+
+function saveSettings() {
+  var s = {
+    volA:         ge('volA').value,
+    volB:         ge('volB').value,
+    rateA:        ge('rateA').value,
+    rateB:        ge('rateB').value,
+    masterVol:    ge('masterVol').value,
+    micVol:       ge('micVol').value,
+    crossfader:   ge('crossfader').value,
+    autoDJOn:     autoDJOn,
+    dspEnabled:   JSON.stringify(dspEnabled),
+    dspBass:      ge('dspBass').value,
+    dspMid:       ge('dspMid').value,
+    dspTreb:      ge('dspTreb').value,
+    dspComp:      ge('dspComp').value,
+    dspClipAmt:   ge('dspClipAmt').value,
+    dspLimitThr:  ge('dspLimitThr').value,
+    cartNames:    JSON.stringify(cartNames),
+    cartEmoji:    JSON.stringify(cartEmoji)
+  };
+  try { localStorage.setItem('eyethu_settings', JSON.stringify(s)); } catch(e) {}
+}
+
+function restoreSettings() {
+  var raw;
+  try { raw = localStorage.getItem('eyethu_settings'); } catch(e) {}
+  if (!raw) return;
+  var s;
+  try { s = JSON.parse(raw); } catch(e) { return; }
+
+  function setV(id, val) { var el=ge(id); if(el&&val!=null) el.value=val; }
+  setV('volA',        s.volA);
+  setV('volB',        s.volB);
+  setV('rateA',       s.rateA);
+  setV('rateB',       s.rateB);
+  setV('masterVol',   s.masterVol);
+  setV('micVol',      s.micVol);
+  setV('crossfader',  s.crossfader);
+
+  // Re-run all slider fills
+  [['volA','volAd',pct],['volB','volBd',pct],
+   ['rateA','rateAd',function(v){return v.toFixed(2)+'x';}],
+   ['rateB','rateBd',function(v){return v.toFixed(2)+'x';}],
+   ['micVol','micVold',pct],['masterVol','masterVold',pct],
+   ['dspBass','dspBassd',sgn],['dspMid','dspMidd',sgn],
+   ['dspTreb','dspTrebd',sgn],['dspComp','dspCompd',function(v){return v;}],
+   ['crossfader',null,null],
+   ['dspClipAmt','dspClipAmtd',function(v){return v;}],
+   ['dspLimitThr','dspLimitThrd',function(v){return v+'dB';}]
+  ].forEach(function(r){setSlider(r[0],r[1],r[2]);});
+
+  // DSP sliders
+  setV('dspBass',     s.dspBass);
+  setV('dspMid',      s.dspMid);
+  setV('dspTreb',     s.dspTreb);
+  setV('dspComp',     s.dspComp);
+  setV('dspClipAmt',  s.dspClipAmt);
+  setV('dspLimitThr', s.dspLimitThr);
+
+  // DSP pills
+  if (s.dspEnabled) {
+    try {
+      var de = JSON.parse(s.dspEnabled);
+      Object.keys(de).forEach(function(k){ dspEnabled[k] = !!de[k]; });
+    } catch(e) {}
+  }
+
+  // Auto-DJ
+  if (s.autoDJOn != null) {
+    autoDJOn = !!s.autoDJOn;
+    var btn = ge('btnAutoDJ');
+    if (btn) {
+      btn.textContent = 'AUTO-DJ: '+(autoDJOn?'ON':'OFF');
+      btn.style.color = autoDJOn?'#5050aa':'#883030';
+    }
+    var disp = ge('adjDisplay');
+    if (disp) disp.textContent = 'AUTO-DJ: '+(autoDJOn?'ON — STANDBY':'DISABLED');
+  }
+
+  // Cart names/emoji
+  if (s.cartNames) { try { cartNames = JSON.parse(s.cartNames); } catch(e) {} }
+  if (s.cartEmoji) { try { cartEmoji = JSON.parse(s.cartEmoji); } catch(e) {} }
+
+  // Re-run slider fills with restored values
+  [['volA','volAd',pct],['volB','volBd',pct],
+   ['rateA','rateAd',function(v){return v.toFixed(2)+'x';}],
+   ['rateB','rateBd',function(v){return v.toFixed(2)+'x';}],
+   ['micVol','micVold',pct],['masterVol','masterVold',pct],
+   ['dspBass','dspBassd',sgn],['dspMid','dspMidd',sgn],
+   ['dspTreb','dspTrebd',sgn],['dspComp','dspCompd',function(v){return v;}],
+   ['crossfader',null,null],
+   ['dspClipAmt','dspClipAmtd',function(v){return v;}],
+   ['dspLimitThr','dspLimitThrd',function(v){return v+'dB';}]
+  ].forEach(function(r){setSlider(r[0],r[1],r[2]);});
+}
+
+// ── Library: save metadata list, store files in IndexedDB ────────────────────
+
+function saveLibMeta() {
+  var meta = lib.map(function(t,i){ return {name:t.name,dur:t.dur,dbKey:'lib_'+i+'_'+t.name}; });
+  try { localStorage.setItem('eyethu_lib', JSON.stringify(meta)); } catch(e) {}
+}
+
+function saveLibFileToDB(idx, file, dur) {
+  var key = 'lib_'+idx+'_'+file.name;
+  dbPut(key, file, file.name, dur);
+}
+
+function restoreLib(cb) {
+  var meta;
+  try { var r=localStorage.getItem('eyethu_lib'); if(r) meta=JSON.parse(r); } catch(e) {}
+  if (!meta||!meta.length) { if(cb) cb(); return; }
+
+  // Load all lib files from IndexedDB
+  dbGetAll('lib_', function(rows) {
+    var fileMap = {};
+    rows.forEach(function(r){ fileMap[r.id] = r; });
+
+    lib = [];
+    meta.forEach(function(m, i) {
+      var key = 'lib_'+i+'_'+m.name;
+      var row = fileMap[key];
+      if (row && row.blob) {
+        var file = new File([row.blob], row.name, { type: row.blob.type || 'audio/mpeg' });
+        lib.push({ file:file, name:m.name, dur:m.dur });
+      }
+      // If file not in DB (e.g. DB cleared), skip — metadata-only won't play
+    });
+    if(cb) cb();
+  });
+}
+
+// ── Queue: save/restore track names (resolved from lib) ──────────────────────
+
+function saveQueue() {
+  var names = queue.map(function(t){ return t.name; });
+  try { localStorage.setItem('eyethu_queue', JSON.stringify(names)); } catch(e) {}
+}
+
+function restoreQueue() {
+  var names;
+  try { var r=localStorage.getItem('eyethu_queue'); if(r) names=JSON.parse(r); } catch(e) {}
+  if (!names||!names.length) return;
+  queue = [];
+  names.forEach(function(n) {
+    var t = lib.find(function(l){ return l.name===n; });
+    if (t) queue.push({file:t.file, name:t.name});
+  });
+  renderQueue();
+}
+
+// ── Cart files: store in IndexedDB, restore on load ──────────────────────────
+
+function saveCartMeta() {
+  var meta = cartFiles.map(function(f,i){
+    return f ? {idx:i,name:f.name,dbKey:'cart_'+i} : null;
+  });
+  try { localStorage.setItem('eyethu_carts', JSON.stringify(meta)); } catch(e) {}
+}
+
+function saveCartFileToDB(idx, file) {
+  dbPut('cart_'+idx, file, file.name, 0);
+}
+
+function restoreCarts(cb) {
+  var meta;
+  try { var r=localStorage.getItem('eyethu_carts'); if(r) meta=JSON.parse(r); } catch(e) {}
+  if (!meta) { if(cb) cb(); return; }
+
+  var pending = 0;
+  meta.forEach(function(m) {
+    if (!m) return;
+    pending++;
+    dbGet('cart_'+m.idx, function(row) {
+      if (row && row.blob) {
+        var f = new File([row.blob], row.name, { type: row.blob.type || 'audio/mpeg' });
+        cartFiles[m.idx] = f;
+        var btn = ge('cartPlay'+m.idx);
+        if (btn) btn.textContent = cartEmoji[m.idx]+' '+noExt(f.name).slice(0,13)+(f.name.length>16?'…':'');
+        // Pre-probe cart duration
+        probeCartDur(m.idx);
+      }
+      pending--;
+      if (pending<=0 && cb) cb();
+    });
+  });
+  if (pending===0 && cb) cb();
+}
+
+// ── Hook: auto-save on every meaningful change ────────────────────────────────
+
+function hookSaveSettings() {
+  var saveT = null;
+  function debouncedSave() {
+    clearTimeout(saveT);
+    saveT = setTimeout(saveSettings, 400);
+  }
+  // All sliders — save on both input (dragging) and change (release)
+  ['volA','volB','rateA','rateB','masterVol','micVol','crossfader',
+   'dspBass','dspMid','dspTreb','dspComp','dspClipAmt','dspLimitThr'
+  ].forEach(function(id) {
+    var el = ge(id);
+    if (el) {
+      el.addEventListener('input',  debouncedSave);
+      el.addEventListener('change', saveSettings);
+    }
+  });
+}
+
+// ── Master boot restore ───────────────────────────────────────────────────────
+
+function restoreAll(cb) {
+  restoreSettings();   // sync: sliders/toggles
+  loadShows();         // sync: SHOWS from localStorage
+
+  restoreLib(function() {
+    restoreQueue();    // needs lib to be loaded first
+    renderLib();
+
+    restoreCarts(function() {
+      buildCartwall();  // re-render cartwall with restored names/emoji
+      buildPills();     // re-render pills with restored dspEnabled state
+      buildShowList();
+      if (cb) cb();
+    });
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  BOOT  — restore everything from storage, then wire save hooks
+// ─────────────────────────────────────────────────────────────────────────────
+restoreAll(function() {
+  hookSaveSettings();
+  toast('✔ Session restored');
+});
+
+// ── SAFETY WATCHDOG ─────────────────────────────────────────────────────────
+// Every 5 seconds: if mic is OFF but micDuckGain is stuck below 0.99, hard-reset it.
+// This is the last line of defence against stuck ducking.
+setInterval(function() {
+  if (!micDuckGain || !ACX) return;
+  if (!micOn) {
+    var g = micDuckGain.gain.value;
+    if (g < 0.99) {
+      console.warn('[WATCHDOG] micDuckGain stuck at', g.toFixed(3), '— hard resetting');
+      hardResetMicDuck();
+    }
+  }
+}, 5000);
+loop();
+</script>
+
+<!-- PWA Install Banner -->
+<div id="installBanner">
+  <div class="ib-icon">📻</div>
+  <div class="ib-text">
+    <div class="ib-title">INSTALL EYETHU RADIO</div>
+    <div class="ib-sub">Install as a standalone app — works offline, launches from your desktop or home screen</div>
+  </div>
+  <div class="ib-btns">
+    <button class="ib-install" id="btnInstall">⬇ INSTALL APP</button>
+    <button class="ib-dismiss" id="btnDismiss">NOT NOW</button>
+  </div>
+</div>
+
+<script>
+// ── PWA: Service Worker Registration ──────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .then(function(reg) {
+        console.log('[SW] Registered, scope:', reg.scope);
+      })
+      .catch(function(err) {
+        console.warn('[SW] Registration failed:', err);
+      });
+  });
+}
+
+// ── PWA: Install Prompt ───────────────────────────────────────────────────────
+var deferredPrompt = null;
+var installBanner  = document.getElementById('installBanner');
+var btnInstall     = document.getElementById('btnInstall');
+var btnDismiss     = document.getElementById('btnDismiss');
+
+// Check if already installed — if so, never show banner
+var isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                || window.navigator.standalone
+                || document.referrer.includes('android-app://');
+
+if (!isStandalone && !sessionStorage.getItem('pwa-dismissed')) {
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBanner.classList.add('show');
+  });
+}
+
+btnInstall.addEventListener('click', function() {
+  if (!deferredPrompt) return;
+  installBanner.classList.remove('show');
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function(choice) {
+    if (choice.outcome === 'accepted') {
+      console.log('[PWA] User accepted install');
+    }
+    deferredPrompt = null;
+  });
+});
+
+btnDismiss.addEventListener('click', function() {
+  installBanner.classList.remove('show');
+  sessionStorage.setItem('pwa-dismissed', '1');
+});
+
+// Hide banner if installed from another path
+window.addEventListener('appinstalled', function() {
+  installBanner.classList.remove('show');
+  deferredPrompt = null;
+});
+</script>
+
+</body>
+</html>
