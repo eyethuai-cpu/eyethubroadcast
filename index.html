@@ -2328,114 +2328,149 @@ ge('micVol').addEventListener('input', function() {
 
 function createBroadcastAndMicChainSmooth(deckSource, micSource) {
 
-  // ── MUSIC CHAIN ────────────────────────────────────────────────────────────
+  // ── METRO FM MUSIC CHAIN ──────────────────────────────────────────────────
 
-  // Loudness normalizer — targets -14 LUFS
-  var normAnalyser = ACX.createAnalyser();
-  normAnalyser.fftSize = 2048;
-  var musicNormalizer = ACX.createGain();
-  musicNormalizer.gain.value = 1;
-  deckSource.connect(normAnalyser);
-  normAnalyser.connect(musicNormalizer);
-  var normData = new Float32Array(normAnalyser.fftSize);
-  (function normalize() {
-    normAnalyser.getFloatTimeDomainData(normData);
-    var sum = 0;
-    for (var i = 0; i < normData.length; i++) sum += normData[i] * normData[i];
-    var rms = Math.sqrt(sum / normData.length);
-    if (rms > 0.00001) {
-      var gain = Math.pow(10, (-14 - 20 * Math.log10(rms)) / 20);
-      var target = Math.min(2.0, Math.max(0.5, gain));
-      // Use smooth ramp (50ms time constant) to prevent zipper noise / crackling
-      musicNormalizer.gain.setTargetAtTime(target, ACX.currentTime, 0.05);
-    }
-    requestAnimationFrame(normalize);
-  })();
+  // Input trim
+  var input = ACX.createGain();
+  input.gain.value = 0.9;
 
-  var preGain = ACX.createGain(); preGain.gain.value = 1.0;
-  var highpass = ACX.createBiquadFilter(); highpass.type = 'highpass'; highpass.frequency.value = 40;
-  var agc = ACX.createDynamicsCompressor(); agc.threshold.value = -18; agc.ratio.value = 2; agc.attack.value = 0.01; agc.release.value = 0.3;
+  // Remove rumble
+  var highpass = ACX.createBiquadFilter();
+  highpass.type = 'highpass';
+  highpass.frequency.value = 35;
 
-  var band1 = ACX.createBiquadFilter(); band1.type = 'lowpass';  band1.frequency.value = 120;
-  var band2 = ACX.createBiquadFilter(); band2.type = 'bandpass'; band2.frequency.value = 300;  band2.Q.value = 0.7;
-  var band3 = ACX.createBiquadFilter(); band3.type = 'bandpass'; band3.frequency.value = 1200; band3.Q.value = 0.7;
-  var band4 = ACX.createBiquadFilter(); band4.type = 'bandpass'; band4.frequency.value = 3500; band4.Q.value = 0.7;
-  var band5 = ACX.createBiquadFilter(); band5.type = 'highpass'; band5.frequency.value = 6000;
+  // Program leveler (slow AGC)
+  var leveler = ACX.createDynamicsCompressor();
+  leveler.threshold.value = -30;
+  leveler.ratio.value = 1.6;
+  leveler.attack.value = 0.2;
+  leveler.release.value = 1.0;
 
-  function makeComp(thr, rat) {
-    var c = ACX.createDynamicsCompressor();
-    c.threshold.value = thr; c.ratio.value = rat; c.attack.value = 0.003; c.release.value = 0.2;
-    return c;
-  }
-  var comp1 = makeComp(-28,3), comp2 = makeComp(-26,3), comp3 = makeComp(-24,2.5);
-  var comp4 = makeComp(-22,2), comp5 = makeComp(-20,2);
-  var merge = ACX.createGain(); merge.gain.value = 2.5; // compensate for 5-band energy split
+  // Density compressor
+  var compressor = ACX.createDynamicsCompressor();
+  compressor.threshold.value = -22;
+  compressor.ratio.value = 3;
+  compressor.attack.value = 0.004;
+  compressor.release.value = 0.25;
 
-  var splitter  = ACX.createChannelSplitter(2);
-  var chanMerge = ACX.createChannelMerger(2);
-  var leftGain  = ACX.createGain(); leftGain.gain.value  = 1.03;
-  var rightGain = ACX.createGain(); rightGain.gain.value = 1.03;
+  // Bass enhancer
+  var bass = ACX.createBiquadFilter();
+  bass.type = 'lowshelf';
+  bass.frequency.value = 95;
+  bass.gain.value = 3;
 
+  // Presence clarity
+  var presence = ACX.createBiquadFilter();
+  presence.type = 'peaking';
+  presence.frequency.value = 3200;
+  presence.Q.value = 1;
+  presence.gain.value = 2;
+
+  // Air brightness
+  var air = ACX.createBiquadFilter();
+  air.type = 'highshelf';
+  air.frequency.value = 9000;
+  air.gain.value = 2;
+
+  // Gentle exciter
   var exciter = ACX.createWaveShaper();
   var excCurve = new Float32Array(1024);
-  for (var i = 0; i < 1024; i++) { var x = i*2/1023-1; excCurve[i] = x + 0.02*Math.sin(Math.PI*x); }
-  exciter.curve = excCurve; exciter.oversample = '4x';
+  for (var i = 0; i < 1024; i++) {
+    var x = i * 2 / 1023 - 1;
+    excCurve[i] = x + 0.03 * Math.sin(Math.PI * x);
+  }
+  exciter.curve = excCurve;
+  exciter.oversample = '4x';
 
-  var bass = ACX.createBiquadFilter(); bass.type = 'lowshelf'; bass.frequency.value = 90; bass.gain.value = 1.2;
-
+  // Soft clipper
   var clipper = ACX.createWaveShaper();
   var clipCurve = new Float32Array(1024);
-  for (var j = 0; j < 1024; j++) { var y = j*2/1023-1; clipCurve[j] = Math.tanh(y); }
-  clipper.curve = clipCurve; clipper.oversample = '4x';
+  for (var j = 0; j < 1024; j++) {
+    var y = j * 2 / 1023 - 1;
+    clipCurve[j] = Math.tanh(2 * y);
+  }
+  clipper.curve = clipCurve;
+  clipper.oversample = '4x';
 
+  // Final limiter
   var limiter = ACX.createDynamicsCompressor();
-  limiter.threshold.value = -2; limiter.ratio.value = 20; limiter.attack.value = 0.001; limiter.release.value = 0.05;
+  limiter.threshold.value = -1;
+  limiter.ratio.value = 20;
+  limiter.attack.value = 0.001;
+  limiter.release.value = 0.05;
 
   // Smooth ducking gain — driven by updateDucking()
   var duckGain = ACX.createGain(); duckGain.gain.value = 1;
 
-  // ── MIC CHAIN ─────────────────────────────────────────────────────────────
-  // micOnGain: 0 = mic muted (off), 1 = mic live — replaces connect/disconnect
+  // ── METRO FM MIC CHAIN ────────────────────────────────────────────────────
+  // micOnGain: 0 = mic muted (off), 1 = mic live
   var micOnGainNode = ACX.createGain(); micOnGainNode.gain.value = 0;
-  var gate    = ACX.createDynamicsCompressor(); gate.threshold.value=-50; gate.ratio.value=1; gate.attack.value=0.01; gate.release.value=0.2;
-  var micComp = ACX.createDynamicsCompressor(); micComp.threshold.value=-18; micComp.ratio.value=3; micComp.attack.value=0.003; micComp.release.value=0.2;
-  var micEQ   = ACX.createBiquadFilter(); micEQ.type='peaking'; micEQ.frequency.value=3000; micEQ.gain.value=2; micEQ.Q.value=1;
+
+  var micInput = ACX.createGain(); micInput.gain.value = 0.65;
+
+  var micHP = ACX.createBiquadFilter();
+  micHP.type = 'highpass';
+  micHP.frequency.value = 80;
+
+  var micComp = ACX.createDynamicsCompressor();
+  micComp.threshold.value = -20;
+  micComp.ratio.value = 3;
+  micComp.attack.value = 0.003;
+  micComp.release.value = 0.3;
+
+  var warmth = ACX.createBiquadFilter();
+  warmth.type = 'lowshelf';
+  warmth.frequency.value = 180;
+  warmth.gain.value = 2;
+
+  var micPresence = ACX.createBiquadFilter();
+  micPresence.type = 'peaking';
+  micPresence.frequency.value = 3000;
+  micPresence.Q.value = 1;
+  micPresence.gain.value = 2;
 
   micGain = ACX.createGain(); micGain.gain.value = +ge('micVol').value;
 
   micSource.connect(micOnGainNode);
-  micOnGainNode.connect(gate);
-  gate.connect(micComp);
-  micComp.connect(micEQ);
-  micEQ.connect(micGain);
+  micOnGainNode.connect(micInput);
+  micInput.connect(micHP);
+  micHP.connect(micComp);
+  micComp.connect(warmth);
+  warmth.connect(micPresence);
+  micPresence.connect(micGain);
 
   // VU meter analyser — after full mic DSP, before master
   micAnal = ACX.createAnalyser(); micAnal.fftSize = 256; micAnal.smoothingTimeConstant = 0.6;
   micGain.connect(micAnal);
 
-  // ── MASTER BUS ────────────────────────────────────────────────────────────
+  // ── MUSIC BUS + MIC BUS + MASTER BUS ─────────────────────────────────────
+  var musicBus = ACX.createGain(); musicBus.gain.value = 0.9;
+  var micBus   = ACX.createGain(); micBus.gain.value   = 0.8;
   var chainMaster = ACX.createGain(); chainMaster.gain.value = 1;
-  // Final output trim — prevents makeup-gain clipping
-  var finalTrim = ACX.createGain(); finalTrim.gain.value = 1.0;
+  var finalTrim   = ACX.createGain(); finalTrim.gain.value   = 1.0;
 
   // ── CONNECTIONS: MUSIC ────────────────────────────────────────────────────
-  musicNormalizer.connect(preGain); preGain.connect(highpass); highpass.connect(agc);
-  agc.connect(band1); agc.connect(band2); agc.connect(band3); agc.connect(band4); agc.connect(band5);
-  band1.connect(comp1); band2.connect(comp2); band3.connect(comp3); band4.connect(comp4); band5.connect(comp5);
-  comp1.connect(merge); comp2.connect(merge); comp3.connect(merge); comp4.connect(merge); comp5.connect(merge);
-  merge.connect(splitter);
-  splitter.connect(leftGain, 0); splitter.connect(rightGain, 1);
-  leftGain.connect(chanMerge, 0, 0); rightGain.connect(chanMerge, 0, 1);
-  chanMerge.connect(exciter); exciter.connect(bass); bass.connect(clipper);
-  clipper.connect(limiter); limiter.connect(duckGain);
-  duckGain.connect(chainMaster);
+  deckSource.connect(input);
+  input.connect(highpass);
+  highpass.connect(leveler);
+  leveler.connect(compressor);
+  compressor.connect(bass);
+  bass.connect(presence);
+  presence.connect(air);
+  air.connect(exciter);
+  exciter.connect(clipper);
+  clipper.connect(limiter);
+  limiter.connect(duckGain);
+  duckGain.connect(musicBus);
+  musicBus.connect(chainMaster);
 
-  // ── MIC INTO MASTER ───────────────────────────────────────────────────────
-  micAnal.connect(chainMaster);
+  // ── CONNECTIONS: MIC ──────────────────────────────────────────────────────
+  micAnal.connect(micBus);
+  micBus.connect(chainMaster);
 
   // ── FINAL TRIM → destination via app masterGain ───────────────────────────
   chainMaster.connect(finalTrim);
-  // finalTrim connects to jingleDuckGain in initACX after chain is built
+  // finalTrim connects to xfGain → jingleDuckGain → masterGain in buildDeckChains()
 
   // ── SMOOTH DUCKING ────────────────────────────────────────────────────────
   var FADE_TIME = 0.15;
@@ -3287,7 +3322,8 @@ loop();
 
 // ── PWA: Inline Service Worker (no external sw.js needed) ─────────────────────
 // Works on GitHub Pages, Vercel, Netlify — no separate sw.js file required
-if ('serviceWorker' in navigator) {
+// SW only works on https:// or http://localhost — skip silently on file://
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   window.addEventListener('load', function() {
     var swCode = [
       '"use strict";',
