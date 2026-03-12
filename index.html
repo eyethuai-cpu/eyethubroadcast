@@ -3345,7 +3345,7 @@ var installBanner  = document.getElementById('installBanner');
 var btnInstall     = document.getElementById('btnInstall');
 var btnDismiss     = document.getElementById('btnDismiss');
 
-// Check if already installed — if so, never show banner
+// Check if already running as installed PWA
 var isStandalone = window.matchMedia('(display-mode: standalone)').matches
                 || window.navigator.standalone
                 || document.referrer.includes('android-app://');
@@ -3357,6 +3357,35 @@ if (!isStandalone && !sessionStorage.getItem('pwa-dismissed')) {
     installBanner.classList.add('show');
   });
 }
+
+function triggerInstall() {
+  if (isStandalone) {
+    // Already running as app — just notify user
+    toast('✅ App is already installed!');
+    return;
+  }
+  if (deferredPrompt) {
+    installBanner.classList.remove('show');
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(choice) {
+      if (choice.outcome === 'accepted') {
+        toast('✅ Installing Eyethu Radio Studio…');
+      }
+      deferredPrompt = null;
+    });
+  } else {
+    // Prompt not available yet — show the banner or instructions
+    installBanner.classList.add('show');
+    toast('📲 Use the INSTALL APP button to add to home screen');
+  }
+}
+
+// Make all app icon images trigger install
+document.querySelectorAll('.app-icon-img').forEach(function(img) {
+  img.style.cursor = 'pointer';
+  img.title = 'Install App';
+  img.addEventListener('click', triggerInstall);
+});
 
 btnInstall.addEventListener('click', function() {
   if (!deferredPrompt) return;
@@ -3379,6 +3408,7 @@ btnDismiss.addEventListener('click', function() {
 window.addEventListener('appinstalled', function() {
   installBanner.classList.remove('show');
   deferredPrompt = null;
+  toast('✅ Eyethu Radio Studio installed!');
 });
 </script>
 
