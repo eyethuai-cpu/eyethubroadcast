@@ -177,10 +177,65 @@ canvas.vu { display:block; background:#090c0a; border:1px solid var(--bd); width
 @keyframes tIn  { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
 @keyframes tOut { to{opacity:0} }
 
+
+/* ── TABS ──────────────────────────────────────────────────────────────────── */
+.tab-bar { display:flex; gap:0; background:#0a0d0b; border-bottom:1px solid var(--bd); padding:0 12px; position:sticky; top:49px; z-index:90; }
+.tab-btn { font-family:'Orbitron',monospace; font-size:.58rem; letter-spacing:.12em; padding:9px 18px; background:none; border:none; border-bottom:2px solid transparent; color:var(--tx-dim); cursor:pointer; text-transform:uppercase; transition:.15s; border-radius:0; }
+.tab-btn:hover { color:var(--tx-bright); background:none; }
+.tab-btn.active { color:var(--g); border-bottom-color:var(--g); }
+
+/* ── TAB PAGES ──────────────────────────────────────────────────────────────── */
+.tab-page { display:none; }
+.tab-page.active { display:block; }
+
+/* ── SETTINGS PAGE LAYOUT ───────────────────────────────────────────────────── */
+.settings-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px; background:var(--bd); margin:8px; }
+.settings-grid .panel { background:var(--bg2); }
+.settings-section-title { font-family:'Orbitron',monospace; font-size:.56rem; letter-spacing:.15em; color:var(--amb); text-transform:uppercase; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid var(--bd); }
+
+/* DSP parameter rows in settings */
+.dsp-param-row { display:flex; align-items:center; gap:6px; margin-bottom:5px; }
+.dsp-param-label { font-size:.55rem; color:var(--tx-mid); width:90px; flex-shrink:0; }
+.dsp-param-val { font-size:.58rem; color:var(--g); width:40px; text-align:right; flex-shrink:0; }
+.dsp-chain-readout { font-size:.48rem; color:var(--tx-mid); line-height:1.8; }
+.dsp-chain-readout .dsp-node { display:flex; align-items:center; gap:6px; }
+.dsp-chain-readout .dsp-node-name { color:var(--gd); width:80px; }
+.dsp-chain-readout .dsp-node-val  { color:var(--tx-bright); }
+
+/* Default volumes table */
+.defaults-table { width:100%; border-collapse:collapse; font-size:.58rem; }
+.defaults-table td { padding:4px 6px; border-bottom:1px solid var(--bd); color:var(--tx-mid); }
+.defaults-table td:first-child { color:var(--gd); font-size:.52rem; letter-spacing:.06em; }
+.defaults-table td:last-child { color:var(--g); text-align:right; }
+
+
+
+/* RADIO CONSOLE */
+.radio-console { grid-column:1/3; }
+.rc-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--bd); }
+.rc-cell { background:var(--bg3); padding:10px 8px; display:flex; flex-direction:column; align-items:center; gap:5px; }
+.rc-label { font-family:'Orbitron',monospace; font-size:.5rem; letter-spacing:.1em; color:var(--gd); text-transform:uppercase; text-align:center; }
+.rc-val { font-size:.62rem; color:var(--g); font-weight:bold; min-width:36px; text-align:center; }
+.rc-fader { writing-mode:vertical-lr; direction:rtl; -webkit-appearance:slider-vertical; appearance:slider-vertical; width:22px; height:90px; cursor:pointer; background:transparent; outline:none; }
+.rc-fader::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:12px; background:var(--g); border-radius:1px; box-shadow:0 0 5px rgba(77,255,124,.5); }
+.rc-fader::-webkit-slider-runnable-track { width:3px; background:var(--bd); border-radius:1px; }
+.rc-fader::-moz-range-thumb { width:20px; height:12px; background:var(--g); border:none; border-radius:1px; }
+.rc-pitch { -webkit-appearance:none; appearance:none; width:100%; height:3px; cursor:pointer; outline:none; background:linear-gradient(90deg,var(--gd) var(--v,50%),var(--bd) var(--v,50%)); }
+.rc-pitch::-webkit-slider-thumb { -webkit-appearance:none; width:10px; height:17px; background:var(--amb); border-radius:1px; box-shadow:0 0 4px rgba(232,160,32,.5); }
+.rc-pitch::-moz-range-thumb { width:10px; height:17px; background:var(--amb); border:none; border-radius:1px; }
+.rc-divider { width:1px; background:var(--bd); height:60px; align-self:center; }
+.rc-cell.rc-deck-a .rc-label { color:var(--g); }
+.rc-cell.rc-deck-b .rc-label { color:var(--blu); }
+.rc-cell.rc-deck-b .rc-fader::-webkit-slider-thumb { background:var(--blu); box-shadow:0 0 5px rgba(58,176,232,.5); }
+.rc-cell.rc-deck-b .rc-val { color:var(--blu); }
+.rc-cell.rc-master .rc-fader::-webkit-slider-thumb { background:#fff; box-shadow:0 0 6px rgba(255,255,255,.4); }
+.rc-cell.rc-master .rc-val { color:#c8d8cc; }
+.rc-cell.rc-master .rc-label { color:#c8d8cc; }
+
 input[type=file] { display:none; }
 
 /* MIC + DSP row */
-.mid-row { grid-column:1/3; display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--bd); }
+.mid-row { grid-column:1/3; display:grid; grid-template-columns:1fr; gap:1px; background:var(--bd); }
 
 /* CROSSFADER ROW */
 .xfader-row { grid-column:1/3; }
@@ -385,6 +440,13 @@ var ICON_32 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr
   </div>
 </header>
 
+
+<!-- Tab Navigation -->
+<nav class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('studio')">🎙 STUDIO</button>
+  <button class="tab-btn" onclick="switchTab('settings')">⚙ SETTINGS</button>
+</nav>
+
 <!-- Hidden file inputs -->
 <input type="file" id="fileA"   accept="audio/*">
 <input type="file" id="fileB"   accept="audio/*">
@@ -394,6 +456,7 @@ var ICON_32 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr
 <input type="file" id="cart2"   accept="audio/*">
 <input type="file" id="cart3"   accept="audio/*">
 
+<div class="tab-page active" id="tabStudio">
 <div class="studio">
 
   <!-- ===== DECK A ===== -->
@@ -537,6 +600,62 @@ var ICON_32 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr
 
   </div>
 
+
+  <!-- ===== RADIO CONSOLE ===== -->
+  <div class="panel radio-console">
+    <div class="panel-title">🎚 Channel Console</div>
+    <div class="rc-grid">
+
+      <!-- Deck A fader -->
+      <div class="rc-cell rc-deck-a">
+        <span class="rc-label">Deck A</span>
+        <input type="range" class="rc-fader" id="deckASlider" min="0" max="1" step="0.01" value="0.78" orient="vertical">
+        <span class="rc-val" id="deckASliderD">78%</span>
+      </div>
+
+      <!-- Deck B fader -->
+      <div class="rc-cell rc-deck-b">
+        <span class="rc-label">Deck B</span>
+        <input type="range" class="rc-fader" id="deckBSlider" min="0" max="1" step="0.01" value="0.78" orient="vertical">
+        <span class="rc-val" id="deckBSliderD">78%</span>
+      </div>
+
+      <!-- Mic fader -->
+      <div class="rc-cell">
+        <span class="rc-label">Mic</span>
+        <input type="range" class="rc-fader" id="micSlider" min="0" max="1" step="0.01" value="0.63" orient="vertical">
+        <span class="rc-val" id="micSliderD">63%</span>
+      </div>
+
+      <!-- Cart / Jingle fader -->
+      <div class="rc-cell">
+        <span class="rc-label">Cart</span>
+        <input type="range" class="rc-fader" id="cartSlider" min="0" max="1" step="0.01" value="0.72" orient="vertical">
+        <span class="rc-val" id="cartSliderD">72%</span>
+      </div>
+
+      <!-- Master fader -->
+      <div class="rc-cell rc-master">
+        <span class="rc-label">Master</span>
+        <input type="range" class="rc-fader" id="masterSlider" min="0" max="1" step="0.01" value="0.95" orient="vertical">
+        <span class="rc-val" id="masterSliderD">95%</span>
+      </div>
+
+      <!-- Crossfader -->
+      <div class="rc-cell" style="grid-column:span 2; align-items:stretch;">
+        <span class="rc-label" style="text-align:left;">⟺ Crossfader &nbsp;<span style="color:var(--g)">A</span> ←→ <span style="color:var(--blu)">B</span></span>
+        <input type="range" class="rc-pitch" id="crossfaderSlider" min="0" max="1" step="0.005" value="0.5" style="margin-top:10px;">
+        <span class="rc-val" id="crossfaderSliderD" style="color:var(--tx-bright);">MIX</span>
+
+        <!-- Pitch / Tempo -->
+        <span class="rc-label" style="margin-top:10px;text-align:left;color:var(--amb);">🎵 Pitch / Tempo</span>
+        <input type="range" class="rc-pitch" id="pitchSlider" min="0.5" max="1.5" step="0.01" value="1.0" style="margin-top:4px;--v:50%;">
+        <span class="rc-val" id="pitchSliderD" style="color:var(--amb);">1.00×</span>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ===== MIC + DSP ===== -->
   <div class="mid-row">
 
@@ -563,23 +682,7 @@ var ICON_32 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr
       </div>
     </div>
 
-    <!-- DSP -->
-    <div class="panel">
-      <div class="panel-title">⚙️ Broadcast DSP Chain</div>
-      <div style="font-size:.52rem;color:var(--gd);margin-bottom:8px;letter-spacing:.04em;">● FM PROCESSOR — ALWAYS ON</div>
-      <div style="font-size:.48rem;color:var(--tx-mid);line-height:1.7;">
-        <div>🎚 LOUDNESS NORMALIZER  <span style="color:var(--gd)">−14 LUFS</span></div>
-        <div>🎛 HIGH PASS  <span style="color:var(--gd)">40 Hz</span></div>
-        <div>🎛 AGC  <span style="color:var(--gd)">−18 dB / 2:1</span></div>
-        <div>🎛 5-BAND MULTIBAND COMP</div>
-        <div>🎛 STEREO WIDENER</div>
-        <div>🎛 HARMONIC EXCITER</div>
-        <div>🎛 BASS ENHANCER  <span style="color:var(--gd)">90 Hz +1.5 dB</span></div>
-        <div>🎛 SOFT CLIPPER  <span style="color:var(--gd)">tanh</span></div>
-        <div>🎛 BRICKWALL LIMITER  <span style="color:var(--gd)">−2 dB</span></div>
-      </div>
-      <div class="pills" id="pillRow" style="display:none"></div>
-    </div>
+    <!-- DSP panel moved to Settings tab -->
 
   </div>
 
@@ -781,6 +884,7 @@ var ICON_32 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr
   </div>
 
 </div><!-- .studio -->
+</div><!-- #tabStudio -->
 
 <script>
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2314,6 +2418,141 @@ ge('micVol').addEventListener('input', function() {
   if (micGain) micGain.gain.value = +this.value;
 });
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  RADIO CONSOLE — Channel fader + crossfader + pitch wiring
+//  Each slider connects directly to the relevant Web Audio gain node
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Deck A fader → xfGainA (pre-crossfader trim) ─────────────────────────────
+ge('deckASlider').addEventListener('input', function() {
+  var v = parseFloat(this.value);
+  ge('deckASliderD').textContent = Math.round(v * 100) + '%';
+  // xfGainA holds the crossfader position — we scale it by the fader level
+  // Store deck fader value and re-apply crossfader so both interact correctly
+  window._deckAFader = v;
+  applyConsoleMix();
+});
+
+// ── Deck B fader → xfGainB ───────────────────────────────────────────────────
+ge('deckBSlider').addEventListener('input', function() {
+  var v = parseFloat(this.value);
+  ge('deckBSliderD').textContent = Math.round(v * 100) + '%';
+  window._deckBFader = v;
+  applyConsoleMix();
+});
+
+// ── Mic fader → micGain node ─────────────────────────────────────────────────
+ge('micSlider').addEventListener('input', function() {
+  var v = parseFloat(this.value);
+  ge('micSliderD').textContent = Math.round(v * 100) + '%';
+  if (micGain) micGain.gain.value = v;
+  // Keep studio mic vol slider in sync
+  ge('micVol').value = v;
+  setSlider('micVol', 'micVold', pct);
+});
+
+// ── Cart fader → jingleDuckGain base level (scales cart/jingle volume) ────────
+ge('cartSlider').addEventListener('input', function() {
+  var v = parseFloat(this.value);
+  ge('cartSliderD').textContent = Math.round(v * 100) + '%';
+  window._cartFaderLevel = v;
+  // Apply to all live cart audio elements
+  cartAudios.forEach(function(a) { if (a && !a.paused) a.volume = v; });
+});
+
+// ── Master fader → masterGain node ───────────────────────────────────────────
+ge('masterSlider').addEventListener('input', function() {
+  var v = parseFloat(this.value);
+  ge('masterSliderD').textContent = Math.round(v * 100) + '%';
+  if (masterGain) masterGain.gain.value = v;
+  // Keep studio master slider in sync
+  ge('masterVol').value = v;
+  setSlider('masterVol', 'masterVold', pct);
+});
+
+// ── Crossfader slider → same equal-power logic as existing crossfader ─────────
+ge('crossfaderSlider').addEventListener('input', function() {
+  var v = parseFloat(this.value);
+  // Sync with the studio crossfader and fire its logic
+  ge('crossfader').value = v;
+  // Update CSS fill on console slider
+  var ratio = (v - 0) / (1 - 0);
+  this.style.setProperty('--v', (ratio * 100) + '%');
+  if (ACX) updateCrossfader();
+  // Label
+  var lbl;
+  if      (v < 0.08) lbl = '◀ A';
+  else if (v > 0.92) lbl = 'B ▶';
+  else if (v < 0.42) lbl = 'A ▸';
+  else if (v > 0.58) lbl = '◂ B';
+  else               lbl = 'MIX';
+  ge('crossfaderSliderD').textContent = lbl;
+});
+
+// Keep console crossfader in sync when studio crossfader moves
+ge('crossfader').addEventListener('input', function() {
+  var v = parseFloat(this.value);
+  ge('crossfaderSlider').value = v;
+  ge('crossfaderSlider').style.setProperty('--v', (v * 100) + '%');
+  var lbl = v < 0.08 ? '◀ A' : v > 0.92 ? 'B ▶' : v < 0.42 ? 'A ▸' : v > 0.58 ? '◂ B' : 'MIX';
+  ge('crossfaderSliderD').textContent = lbl;
+});
+
+// ── Pitch / Tempo slider → playbackRate on both decks ─────────────────────────
+ge('pitchSlider').addEventListener('input', function() {
+  var v = parseFloat(this.value);
+  var ratio = (v - 0.5) / (1.5 - 0.5);
+  this.style.setProperty('--v', (ratio * 100) + '%');
+  ge('pitchSliderD').textContent = v.toFixed(2) + '×';
+  decks.A.audio.playbackRate = v;
+  decks.B.audio.playbackRate = v;
+  // Also update the per-deck speed sliders
+  ge('rateA').value = Math.min(2, Math.max(0.5, v));
+  ge('rateB').value = Math.min(2, Math.max(0.5, v));
+  setSlider('rateA', 'rateAd', function(val){ return val.toFixed(2)+'x'; });
+  setSlider('rateB', 'rateBd', function(val){ return val.toFixed(2)+'x'; });
+});
+
+// ── applyConsoleMix: deck fader × crossfader equal-power blend ────────────────
+// Deck fader acts as a channel trim BEFORE the crossfader.
+// We override xfGainA/B with: xfCurve × deckFader trim.
+window._deckAFader = 0.78;
+window._deckBFader = 0.78;
+window._cartFaderLevel = 0.72;
+
+function applyConsoleMix() {
+  if (!ACX || !xfGainA || !xfGainB) return;
+  var xf = parseFloat(ge('crossfader').value);
+  var gA = Math.cos(xf * Math.PI / 2) * (window._deckAFader || 1);
+  var gB = Math.cos((1 - xf) * Math.PI / 2) * (window._deckBFader || 1);
+  xfGainA.gain.setTargetAtTime(gA, ACX.currentTime, 0.05);
+  xfGainB.gain.setTargetAtTime(gB, ACX.currentTime, 0.05);
+}
+
+// ── Keep studio deck vol sliders in sync with console ─────────────────────────
+ge('volA').addEventListener('input', function() {
+  var v = +this.value;
+  ge('deckASlider').value = v;
+  ge('deckASliderD').textContent = Math.round(v * 100) + '%';
+  window._deckAFader = v;
+});
+ge('volB').addEventListener('input', function() {
+  var v = +this.value;
+  ge('deckBSlider').value = v;
+  ge('deckBSliderD').textContent = Math.round(v * 100) + '%';
+  window._deckBFader = v;
+});
+ge('masterVol').addEventListener('input', function() {
+  ge('masterSlider').value = this.value;
+  ge('masterSliderD').textContent = Math.round(+this.value * 100) + '%';
+});
+ge('micVol').addEventListener('input', function() {
+  ge('micSlider').value = this.value;
+  ge('micSliderD').textContent = Math.round(+this.value * 100) + '%';
+});
+
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  BROADCAST + MIC DSP CHAIN — Smooth ducking, no crackle
 //
@@ -2348,29 +2587,29 @@ function createBroadcastAndMicChainSmooth(deckSource, micSource) {
 
   // Density compressor
   var compressor = ACX.createDynamicsCompressor();
-  compressor.threshold.value = -22;
-  compressor.ratio.value = 3;
-  compressor.attack.value = 0.004;
-  compressor.release.value = 0.25;
+  compressor.threshold.value = -16;
+  compressor.ratio.value = 3.5;
+  compressor.attack.value = 0.008;
+  compressor.release.value = 0.18;
 
   // Bass enhancer
   var bass = ACX.createBiquadFilter();
   bass.type = 'lowshelf';
-  bass.frequency.value = 95;
-  bass.gain.value = 3;
+  bass.frequency.value = 90;
+  bass.gain.value = 4;
 
   // Presence clarity
   var presence = ACX.createBiquadFilter();
   presence.type = 'peaking';
-  presence.frequency.value = 3200;
+  presence.frequency.value = 3000;
   presence.Q.value = 1;
-  presence.gain.value = 2;
+  presence.gain.value = 3;
 
   // Air brightness
   var air = ACX.createBiquadFilter();
   air.type = 'highshelf';
   air.frequency.value = 9000;
-  air.gain.value = 2;
+  air.gain.value = 3;
 
   // Gentle exciter
   var exciter = ACX.createWaveShaper();
@@ -2394,10 +2633,10 @@ function createBroadcastAndMicChainSmooth(deckSource, micSource) {
 
   // Final limiter
   var limiter = ACX.createDynamicsCompressor();
-  limiter.threshold.value = -1;
-  limiter.ratio.value = 20;
-  limiter.attack.value = 0.001;
-  limiter.release.value = 0.05;
+  limiter.threshold.value = -0.5;
+  limiter.ratio.value = 25;
+  limiter.attack.value = 0.002;
+  limiter.release.value = 0.04;
 
   // Smooth ducking gain — driven by updateDucking()
   var duckGain = ACX.createGain(); duckGain.gain.value = 1;
@@ -2484,6 +2723,11 @@ function createBroadcastAndMicChainSmooth(deckSource, micSource) {
   // Expose micOnGainNode so toggleMic can mute/unmute cleanly
   micOnGain = micOnGainNode;
 
+  // Register DSP nodes globally so Settings tab sliders can adjust them live
+  if (!window._dspNodes) window._dspNodes = [];
+  window._dspNodes.push({ highpass: highpass, leveler: leveler, compressor: compressor,
+    bass: bass, presence: presence, air: air, limiter: limiter });
+
   return { master: chainMaster, finalTrim: finalTrim, updateDucking: updateDucking };
 }
 
@@ -2542,6 +2786,10 @@ function setupMic() {
     },
     video: false
   };
+  // Honour device selected in Settings → Audio Device Routing
+  if (window._micDeviceId) {
+    micConstraints.audio.deviceId = { exact: window._micDeviceId };
+  }
   navigator.mediaDevices.getUserMedia(micConstraints)
     .then(function(stream) {
       // Stop any previous stream
@@ -3448,5 +3696,437 @@ window.addEventListener('appinstalled', function() {
 });
 </script>
 
+
+<!-- ===================== SETTINGS TAB ===================== -->
+<div class="tab-page" id="tabSettings">
+<div class="settings-grid">
+
+  <!-- ── DSP CHAIN STATUS ── -->
+  <div class="panel">
+    <div class="settings-section-title">⚙ Broadcast DSP Chain</div>
+    <div style="font-size:.5rem;color:var(--gd);margin-bottom:8px;letter-spacing:.05em;">● FM PROCESSOR — ALWAYS ON</div>
+    <div class="dsp-chain-readout">
+      <div class="dsp-node"><span class="dsp-node-name">HPF</span><span class="dsp-node-val">35 Hz, −12 dB/oct</span></div>
+      <div class="dsp-node"><span class="dsp-node-name">LEVELER</span><span class="dsp-node-val">−30 dB / 1.6:1 slow AGC</span></div>
+      <div class="dsp-node"><span class="dsp-node-name">COMPRESSOR</span><span class="dsp-node-val">−16 dB / 3.5:1 fast</span></div>
+      <div class="dsp-node"><span class="dsp-node-name">BASS EQ</span><span class="dsp-node-val">90 Hz lowshelf +4 dB</span></div>
+      <div class="dsp-node"><span class="dsp-node-name">PRESENCE</span><span class="dsp-node-val">3 kHz peaking +3 dB</span></div>
+      <div class="dsp-node"><span class="dsp-node-name">AIR</span><span class="dsp-node-val">9 kHz highshelf +3 dB</span></div>
+      <div class="dsp-node"><span class="dsp-node-name">EXCITER</span><span class="dsp-node-val">tanh × 0.03 harmonic</span></div>
+      <div class="dsp-node"><span class="dsp-node-name">SOFT CLIP</span><span class="dsp-node-val">tanh(2x) 4× oversample</span></div>
+      <div class="dsp-node"><span class="dsp-node-name">LIMITER</span><span class="dsp-node-val">−0.5 dB / 25:1 brick wall</span></div>
+      <div class="dsp-node"><span class="dsp-node-name">OUTPUT</span><span class="dsp-node-val">0.95 constant trim</span></div>
+    </div>
+    <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--bd);">
+      <div class="settings-section-title" style="margin-bottom:6px;">Mic DSP Chain</div>
+      <div class="dsp-chain-readout">
+        <div class="dsp-node"><span class="dsp-node-name">HPF</span><span class="dsp-node-val">80 Hz (−rumble)</span></div>
+        <div class="dsp-node"><span class="dsp-node-name">COMPRESSOR</span><span class="dsp-node-val">−20 dB / 3:1</span></div>
+        <div class="dsp-node"><span class="dsp-node-name">WARMTH</span><span class="dsp-node-val">180 Hz lowshelf +2 dB</span></div>
+        <div class="dsp-node"><span class="dsp-node-name">PRESENCE</span><span class="dsp-node-val">3 kHz peaking +2 dB</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DSP TUNABLE PARAMETERS ── -->
+  <div class="panel">
+    <div class="settings-section-title">🎛 DSP Parameters</div>
+
+    <div style="font-size:.5rem;color:var(--tx-dim);margin-bottom:8px;">Adjust live — changes take effect immediately</div>
+
+    <div class="dsp-param-row">
+      <span class="dsp-param-label">HPF FREQ</span>
+      <input type="range" id="setHPF" min="20" max="120" step="1" value="35" style="flex:1;height:3px;">
+      <span class="dsp-param-val" id="setHPFd">35 Hz</span>
+    </div>
+    <div class="dsp-param-row">
+      <span class="dsp-param-label">AGC THRESH</span>
+      <input type="range" id="setAGCThresh" min="-40" max="-10" step="1" value="-30" style="flex:1;height:3px;">
+      <span class="dsp-param-val" id="setAGCThreshd">−30</span>
+    </div>
+    <div class="dsp-param-row">
+      <span class="dsp-param-label">COMP RATIO</span>
+      <input type="range" id="setCompRatio" min="1" max="10" step="0.1" value="3.5" style="flex:1;height:3px;">
+      <span class="dsp-param-val" id="setCompRatiod">3:1</span>
+    </div>
+    <div class="dsp-param-row">
+      <span class="dsp-param-label">BASS GAIN</span>
+      <input type="range" id="setBassGain" min="-6" max="9" step="0.5" value="4" style="flex:1;height:3px;">
+      <span class="dsp-param-val" id="setBassGaind">+3 dB</span>
+    </div>
+    <div class="dsp-param-row">
+      <span class="dsp-param-label">AIR GAIN</span>
+      <input type="range" id="setAirGain" min="-6" max="9" step="0.5" value="3" style="flex:1;height:3px;">
+      <span class="dsp-param-val" id="setAirGaind">+2 dB</span>
+    </div>
+    <div class="dsp-param-row">
+      <span class="dsp-param-label">PRESENCE</span>
+      <input type="range" id="setPresGain" min="-6" max="9" step="0.5" value="3" style="flex:1;height:3px;">
+      <span class="dsp-param-val" id="setPresGaind">+2 dB</span>
+    </div>
+    <div class="dsp-param-row">
+      <span class="dsp-param-label">LIMITER</span>
+      <input type="range" id="setLimThresh" min="-12" max="0" step="0.5" value="-0.5" style="flex:1;height:3px;">
+      <span class="dsp-param-val" id="setLimThreshd">−1 dB</span>
+    </div>
+
+    <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--bd);">
+      <div class="settings-section-title" style="margin-bottom:6px;">Default Fader Levels</div>
+      <table class="defaults-table">
+        <tr><td>DECK A</td><td><input type="range" id="defVolA" min="0" max="1" step="0.01" value="0.78" style="width:80px;height:2px;"></td><td id="defVolAd">78%</td></tr>
+        <tr><td>DECK B</td><td><input type="range" id="defVolB" min="0" max="1" step="0.01" value="0.78" style="width:80px;height:2px;"></td><td id="defVolBd">78%</td></tr>
+        <tr><td>MIC</td><td><input type="range" id="defVolMic" min="0" max="1" step="0.01" value="0.63" style="width:80px;height:2px;"></td><td id="defVolMicd">63%</td></tr>
+        <tr><td>CART</td><td><input type="range" id="defVolCart" min="0" max="1" step="0.01" value="0.72" style="width:80px;height:2px;"></td><td id="defVolCartd">72%</td></tr>
+        <tr><td>MASTER</td><td><input type="range" id="defVolMaster" min="0" max="1" step="0.01" value="0.95" style="width:80px;height:2px;"></td><td id="defVolMasterd">95%</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── AUDIO DEVICES ── -->
+  <div class="panel">
+    <div class="settings-section-title">🔊 Audio Device Routing</div>
+
+    <!-- Per-channel device selectors -->
+    <div style="margin-bottom:10px;">
+      <div style="font-size:.5rem;color:var(--tx-dim);margin-bottom:8px;letter-spacing:.05em;">SELECT INPUT / OUTPUT PER CHANNEL</div>
+
+      <div style="margin-bottom:6px;">
+        <div class="dsp-param-label" style="margin-bottom:3px;color:var(--gd);">🎙 MIC INPUT</div>
+        <select id="micDevice" style="width:100%;background:var(--bg3);border:1px solid var(--bd);color:var(--tx-bright);font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:4px 6px;outline:none;border-radius:1px;"></select>
+      </div>
+
+      <div style="margin-bottom:6px;">
+        <div class="dsp-param-label" style="margin-bottom:3px;color:var(--g);">▶ DECK A OUTPUT</div>
+        <select id="deckADevice" style="width:100%;background:var(--bg3);border:1px solid var(--bd);color:var(--tx-bright);font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:4px 6px;outline:none;border-radius:1px;"></select>
+      </div>
+
+      <div style="margin-bottom:6px;">
+        <div class="dsp-param-label" style="margin-bottom:3px;color:var(--blu);">▶ DECK B OUTPUT</div>
+        <select id="deckBDevice" style="width:100%;background:var(--bg3);border:1px solid var(--bd);color:var(--tx-bright);font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:4px 6px;outline:none;border-radius:1px;"></select>
+      </div>
+
+      <div style="margin-bottom:6px;">
+        <div class="dsp-param-label" style="margin-bottom:3px;color:var(--amb);">🎛 CART OUTPUT</div>
+        <select id="cartDevice" style="width:100%;background:var(--bg3);border:1px solid var(--bd);color:var(--tx-bright);font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:4px 6px;outline:none;border-radius:1px;"></select>
+      </div>
+
+      <div style="margin-bottom:8px;">
+        <div class="dsp-param-label" style="margin-bottom:3px;color:#c8d8cc;">⬛ MASTER OUTPUT</div>
+        <select id="mainOutput" style="width:100%;background:var(--bg3);border:1px solid var(--bd);color:var(--tx-bright);font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:4px 6px;outline:none;border-radius:1px;"></select>
+      </div>
+
+      <div style="margin-bottom:6px;">
+        <div class="dsp-param-label" style="margin-bottom:3px;color:#5090b8;">🎧 CUE / HEADPHONES</div>
+        <select id="cueOutput" style="width:100%;background:var(--bg3);border:1px solid var(--bd);color:var(--tx-bright);font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:4px 6px;outline:none;border-radius:1px;"></select>
+      </div>
+
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;">
+        <button id="refreshDevices" style="flex:1;border-color:var(--gd);color:var(--gd);font-size:.58rem;padding:5px 10px;">↺ REFRESH DEVICES</button>
+      </div>
+      <div class="device-status" id="deviceStatus" style="font-size:.54rem;color:var(--tx-dim);margin-top:6px;min-height:14px;">No device switched yet</div>
+    </div>
+
+    <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--bd);">
+      <div class="settings-section-title" style="margin-bottom:6px;">Microphone</div>
+      <div class="mic-status warn" id="micStatusSettings" style="font-size:.58rem;margin-bottom:8px;">MIC: Not connected</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;">
+        <button id="btnMicReconnectSettings" style="border-color:#1a3535;color:#009090;font-size:.58rem;padding:5px 10px;">🔄 RECONNECT MIC</button>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;padding-top:8px;border-top:1px solid var(--bd);">
+      <div class="settings-section-title" style="margin-bottom:6px;">Auto-Duck Settings</div>
+      <div class="dsp-param-row">
+        <span class="dsp-param-label">DUCK LEVEL</span>
+        <input type="range" id="setDuckLevel" min="0" max="1" step="0.05" value="0.2" style="flex:1;height:3px;">
+        <span class="dsp-param-val" id="setDuckLeveld">20%</span>
+      </div>
+      <div class="dsp-param-row">
+        <span class="dsp-param-label">GATE THRESH</span>
+        <input type="range" id="setGateThresh" min="0.005" max="0.1" step="0.005" value="0.028" style="flex:1;height:3px;">
+        <span class="dsp-param-val" id="setGateThreshd">0.028</span>
+      </div>
+      <div class="dsp-param-row">
+        <span class="dsp-param-label">RELEASE</span>
+        <input type="range" id="setDuckRelease" min="10" max="120" step="5" value="55" style="flex:1;height:3px;">
+        <span class="dsp-param-val" id="setDuckReleased">55 fr</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- .settings-grid -->
+</div><!-- #tabSettings -->
+
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+//  TAB SWITCHER
+// ─────────────────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  var page = document.getElementById('tab' + name.charAt(0).toUpperCase() + name.slice(1));
+  if (page) page.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(function(b){
+    if (b.textContent.toLowerCase().indexOf(name) >= 0 || b.getAttribute('onclick').indexOf(name) >= 0)
+      b.classList.add('active');
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  SETTINGS — DSP PARAMETER CONTROLS
+//  Wire settings sliders to the actual Web Audio nodes in the existing chain
+// ─────────────────────────────────────────────────────────────────────────────
+function bindSettingsControls() {
+  // HPF frequency
+  var hpfEl = document.getElementById('setHPF');
+  if (hpfEl) hpfEl.addEventListener('input', function() {
+    var v = +this.value;
+    document.getElementById('setHPFd').textContent = v + ' Hz';
+    // Update all deck chains via ACX if running
+    if (typeof ACX !== 'undefined' && ACX) {
+      // The highpass is inside createBroadcastAndMicChainSmooth per-deck
+      // We expose it via a settings object once chains are built
+      if (window._dspNodes) window._dspNodes.forEach(function(n){ if(n.highpass) n.highpass.frequency.value = v; });
+    }
+  });
+
+  // AGC threshold
+  var agcEl = document.getElementById('setAGCThresh');
+  if (agcEl) agcEl.addEventListener('input', function() {
+    var v = +this.value;
+    document.getElementById('setAGCThreshd').textContent = (v > 0 ? '+' : '') + v;
+    if (window._dspNodes) window._dspNodes.forEach(function(n){ if(n.leveler) n.leveler.threshold.value = v; });
+  });
+
+  // Compressor ratio
+  var compEl = document.getElementById('setCompRatio');
+  if (compEl) compEl.addEventListener('input', function() {
+    var v = +this.value;
+    document.getElementById('setCompRatiod').textContent = v.toFixed(1) + ':1';
+    if (window._dspNodes) window._dspNodes.forEach(function(n){ if(n.compressor) n.compressor.ratio.value = v; });
+  });
+
+  // Bass EQ gain
+  var bassEl = document.getElementById('setBassGain');
+  if (bassEl) bassEl.addEventListener('input', function() {
+    var v = +this.value;
+    document.getElementById('setBassGaind').textContent = (v >= 0 ? '+' : '') + v + ' dB';
+    if (window._dspNodes) window._dspNodes.forEach(function(n){ if(n.bass) n.bass.gain.value = v; });
+  });
+
+  // Air EQ gain
+  var airEl = document.getElementById('setAirGain');
+  if (airEl) airEl.addEventListener('input', function() {
+    var v = +this.value;
+    document.getElementById('setAirGaind').textContent = (v >= 0 ? '+' : '') + v + ' dB';
+    if (window._dspNodes) window._dspNodes.forEach(function(n){ if(n.air) n.air.gain.value = v; });
+  });
+
+  // Presence EQ gain
+  var presEl = document.getElementById('setPresGain');
+  if (presEl) presEl.addEventListener('input', function() {
+    var v = +this.value;
+    document.getElementById('setPresGaind').textContent = (v >= 0 ? '+' : '') + v + ' dB';
+    if (window._dspNodes) window._dspNodes.forEach(function(n){ if(n.presence) n.presence.gain.value = v; });
+  });
+
+  // Limiter threshold
+  var limEl = document.getElementById('setLimThresh');
+  if (limEl) limEl.addEventListener('input', function() {
+    var v = +this.value;
+    document.getElementById('setLimThreshd').textContent = (v > 0 ? '+' : '') + v + ' dB';
+    if (window._dspNodes) window._dspNodes.forEach(function(n){ if(n.limiter) n.limiter.threshold.value = v; });
+  });
+
+  // ── Duck level ─────────────────────────────────────────────────────────────
+  var duckEl = document.getElementById('setDuckLevel');
+  if (duckEl) duckEl.addEventListener('input', function() {
+    var v = +this.value;
+    document.getElementById('setDuckLeveld').textContent = Math.round(v*100) + '%';
+    if (typeof MIC_DUCK_LEVEL !== 'undefined') window.MIC_DUCK_LEVEL = v;
+  });
+
+  // ── Gate threshold ─────────────────────────────────────────────────────────
+  var gateEl = document.getElementById('setGateThresh');
+  if (gateEl) gateEl.addEventListener('input', function() {
+    var v = +this.value;
+    document.getElementById('setGateThreshd').textContent = v.toFixed(3);
+    if (typeof MIC_GATE_THRESH !== 'undefined') window.MIC_GATE_THRESH = v;
+  });
+
+  // ── Duck release frames ────────────────────────────────────────────────────
+  var relEl = document.getElementById('setDuckRelease');
+  if (relEl) relEl.addEventListener('input', function() {
+    var v = +this.value;
+    document.getElementById('setDuckReleased').textContent = v + ' fr';
+    if (typeof MIC_RELEASE_FRAMES !== 'undefined') window.MIC_RELEASE_FRAMES = v;
+  });
+
+  // ── Default volume sliders ─────────────────────────────────────────────────
+  [['defVolA','defVolAd','volA'],['defVolB','defVolBd','volB'],
+   ['defVolMic','defVolMicd','micVol'],['defVolMaster','defVolMasterd','masterVol']].forEach(function(row){
+    var el = document.getElementById(row[0]);
+    if (!el) return;
+    el.addEventListener('input', function() {
+      var v = +this.value;
+      document.getElementById(row[1]).textContent = Math.round(v*100) + '%';
+      // Also update the live fader on studio tab
+      var live = document.getElementById(row[2]);
+      if (live) { live.value = v; live.dispatchEvent(new Event('input')); }
+    });
+  });
+  var cartDefEl = document.getElementById('defVolCart');
+  if (cartDefEl) cartDefEl.addEventListener('input', function() {
+    document.getElementById('defVolCartd').textContent = Math.round(+this.value*100) + '%';
+  });
+
+  // ── Mic reconnect from settings ────────────────────────────────────────────
+  var micBtn = document.getElementById('btnMicReconnectSettings');
+  if (micBtn) micBtn.addEventListener('click', function() {
+    if (typeof setupMic === 'function') setupMic();
+  });
+
+  // ── Keep mic status synced between studio and settings panels ─────────────
+  var origStatus = document.getElementById('micStatus');
+  var setStatus  = document.getElementById('micStatusSettings');
+  if (origStatus && setStatus) {
+    var observer = new MutationObserver(function() {
+      setStatus.textContent  = origStatus.textContent;
+      setStatus.className    = origStatus.className;
+    });
+    observer.observe(origStatus, { childList: true, characterData: true, subtree: true, attributes: true });
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  AUDIO DEVICE CONTROL (moved to Settings tab)
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadAudioDevices() {
+  var mainSel   = document.getElementById('mainOutput');
+  var cueSel    = document.getElementById('cueOutput');
+  var deckASel  = document.getElementById('deckADevice');
+  var deckBSel  = document.getElementById('deckBDevice');
+  var cartSel   = document.getElementById('cartDevice');
+  var micSel    = document.getElementById('micDevice');
+  var statusEl  = document.getElementById('deviceStatus');
+  if (!mainSel || !cueSel) return;
+  try {
+    await navigator.mediaDevices.getUserMedia({ audio: true }).then(function(s){ s.getTracks().forEach(function(t){t.stop();}); }).catch(function(){});
+    var devices  = await navigator.mediaDevices.enumerateDevices();
+    var outputs  = devices.filter(function(d){ return d.kind === 'audiooutput'; });
+    var inputs   = devices.filter(function(d){ return d.kind === 'audioinput'; });
+    function fillSel(sel, list, fallback) {
+      if (!sel) return;
+      var prev = sel.value;
+      sel.innerHTML = '';
+      if (!list.length) { sel.innerHTML = '<option value="">' + fallback + '</option>'; return; }
+      list.forEach(function(device) {
+        var label = device.label || ('Device ' + device.deviceId.slice(0,6));
+        var o = document.createElement('option'); o.value = device.deviceId; o.textContent = label;
+        sel.appendChild(o);
+      });
+      if (prev) sel.value = prev;
+    }
+    fillSel(mainSel,  outputs, 'No output devices found');
+    fillSel(cueSel,   outputs, 'No output devices found');
+    fillSel(deckASel, outputs, 'No output devices found');
+    fillSel(deckBSel, outputs, 'No output devices found');
+    fillSel(cartSel,  outputs, 'No output devices found');
+    fillSel(micSel,   inputs,  'No input devices found');
+    if (statusEl) statusEl.textContent = outputs.length + ' output(s), ' + inputs.length + ' input(s) found';
+  } catch(e) {
+    if (statusEl) statusEl.textContent = 'Error: ' + e.message;
+  }
+}
+
+document.getElementById('mainOutput').addEventListener('change', async function() {
+  var id = this.value, statusEl = document.getElementById('deviceStatus');
+  var targets = [];
+  if (typeof decks !== 'undefined') targets.push(decks.A.audio, decks.B.audio);
+  if (typeof cartAudios !== 'undefined') cartAudios.forEach(function(a){ if(a) targets.push(a); });
+  var ok=0,fail=0;
+  for (var i=0;i<targets.length;i++) {
+    if (targets[i] && typeof targets[i].setSinkId==='function') {
+      try { await targets[i].setSinkId(id); ok++; } catch(e) { fail++; }
+    }
+  }
+  if (statusEl) statusEl.textContent = ok ? 'Main → ' + (this.options[this.selectedIndex]||{}).text : 'setSinkId not supported';
+  if (ok && typeof toast==='function') toast('🔊 Main output switched');
+});
+
+document.getElementById('cueOutput').addEventListener('change', async function() {
+  var id = this.value, statusEl = document.getElementById('deviceStatus');
+  var el = new Audio();
+  if (typeof el.setSinkId !== 'function') { if(statusEl) statusEl.textContent = 'Cue: setSinkId not supported'; return; }
+  try { await el.setSinkId(id); if(statusEl) statusEl.textContent = 'Cue → '+(this.options[this.selectedIndex]||{}).text; if(typeof toast==='function') toast('🎧 Cue output switched'); }
+  catch(e) { if(statusEl) statusEl.textContent = 'Cue error: '+e.message; }
+});
+
+document.getElementById('refreshDevices').addEventListener('click', function(){
+  loadAudioDevices();
+  if (typeof toast==='function') toast('↺ Devices refreshed');
+});
+
+navigator.mediaDevices.addEventListener('devicechange', loadAudioDevices);
+loadAudioDevices();
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  INIT SETTINGS CONTROLS on DOM ready
+// ─────────────────────────────────────────────────────────────────────────────
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bindSettingsControls);
+} else {
+  bindSettingsControls();
+}
+</script>
+
 </body>
 </html>
+<script>
+// ── Per-channel device routing (added by Complete Console update) ──────────────
+(function() {
+  function addDeviceListener(selId, handler) {
+    var el = document.getElementById(selId);
+    if (el) el.addEventListener('change', handler);
+  }
+
+  addDeviceListener('deckADevice', async function() {
+    var id = this.value, statusEl = document.getElementById('deviceStatus');
+    if (typeof decks !== 'undefined' && decks.A && decks.A.audio && typeof decks.A.audio.setSinkId === 'function') {
+      try { await decks.A.audio.setSinkId(id); if(statusEl) statusEl.textContent = 'Deck A → ' + (this.options[this.selectedIndex]||{}).text; if(typeof toast==='function') toast('🎵 Deck A output switched'); }
+      catch(e) { if(statusEl) statusEl.textContent = 'Deck A error: '+e.message; }
+    } else if(statusEl) statusEl.textContent = 'setSinkId not supported in this browser';
+  });
+
+  addDeviceListener('deckBDevice', async function() {
+    var id = this.value, statusEl = document.getElementById('deviceStatus');
+    if (typeof decks !== 'undefined' && decks.B && decks.B.audio && typeof decks.B.audio.setSinkId === 'function') {
+      try { await decks.B.audio.setSinkId(id); if(statusEl) statusEl.textContent = 'Deck B → ' + (this.options[this.selectedIndex]||{}).text; if(typeof toast==='function') toast('🎵 Deck B output switched'); }
+      catch(e) { if(statusEl) statusEl.textContent = 'Deck B error: '+e.message; }
+    } else if(statusEl) statusEl.textContent = 'setSinkId not supported in this browser';
+  });
+
+  addDeviceListener('cartDevice', async function() {
+    var id = this.value, statusEl = document.getElementById('deviceStatus');
+    if (typeof cartAudios !== 'undefined') {
+      var ok=0, fail=0;
+      for (var i=0; i<cartAudios.length; i++) {
+        if (cartAudios[i] && typeof cartAudios[i].setSinkId === 'function') {
+          try { await cartAudios[i].setSinkId(id); ok++; } catch(e) { fail++; }
+        }
+      }
+      if(statusEl) statusEl.textContent = ok ? 'Cart → ' + (this.options[this.selectedIndex]||{}).text : 'setSinkId not supported';
+      if(ok && typeof toast==='function') toast('🎛 Cart output switched');
+    }
+  });
+
+  addDeviceListener('micDevice', function() {
+    window._micDeviceId = this.value;
+    if (typeof setupMic === 'function') {
+      setupMic();
+      if(typeof toast==='function') toast('🎙 Mic device switched — reconnecting…');
+    }
+  });
+})();
+</script>
