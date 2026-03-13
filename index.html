@@ -968,6 +968,7 @@ var micDucking     = false;
 var MIC_DUCK_LEVEL  = 0.2;   // music drops to 20% when DJ speaks
 var MIC_GATE_THRESH = 0.028; // RMS threshold — above = speaking, below = silence
 var MIC_ONSET_FRAMES  = 2;   // consecutive frames above threshold before ducking starts
+var MIC_RESTORE_GUARD = true; // keep ducked until mic turns OFF or sustained silence
 var MIC_RELEASE_FRAMES = 55; // consecutive frames below threshold before music restores (~0.9s @60fps)
 var micSpeakCount  = 0;      // consecutive frames detected as speech
 var micSilCount    = 0;      // consecutive frames detected as silence
@@ -2309,7 +2310,10 @@ function processMicDuck() {
     }
   } else {
     micSilCount++; micSpeakCount = 0;
-    if (micDucking && micSilCount >= MIC_RELEASE_FRAMES) {
+    // While mic is ON: only restore after a longer silence (DJ pausing between words)
+    // Use 3x the normal release frames so music stays ducked between sentences
+    var releaseThresh = micOn ? MIC_RELEASE_FRAMES * 3 : MIC_RELEASE_FRAMES;
+    if (micDucking && micSilCount >= releaseThresh) {
       micDucking = false; micSilCount = 0;
       ['A','B'].forEach(function(id){ if(broadcastChains[id]) broadcastChains[id].updateDucking(false); });
       if (ind) { ind.textContent = 'AUTO-DUCK: STANDBY'; ind.classList.remove('active'); }
@@ -2345,19 +2349,24 @@ function toggleMic() {
     st.textContent = 'MIC: 🔴 LIVE'; st.className = 'mic-status ok';
     btn.textContent = '🔇 MIC OFF';
     btn.style.background = 'var(--g)'; btn.style.color = 'var(--bg)'; btn.style.borderColor = 'var(--g)';
-    // Restore music to full — always start undocked
-    ['A','B'].forEach(function(id){ if(broadcastChains[id]) broadcastChains[id].updateDucking(false); });
+    // Duck music immediately when mic goes live — don't wait for speech detection
+    micDucking = true; micSpeakCount = MIC_ONSET_FRAMES; micSilCount = 0;
+    ['A','B'].forEach(function(id){ if(broadcastChains[id]) broadcastChains[id].updateDucking(true); });
+    var ind = ge('duckIndicator');
+    if (ind) { ind.textContent = '🎤 AUTO-DUCK: ACTIVE'; ind.classList.add('active'); }
   } else {
     // Ramp mic out smoothly — no click
     micOnGain.gain.cancelScheduledValues(now);
     micOnGain.gain.setValueAtTime(micOnGain.gain.value, now);
-    micOnGain.gain.linearRampToValueAtTime(0, now + 0.05);
+    micOnGain.gain.linearRampToValueAtTime(0, now + 0.08);
     st.textContent = 'MIC: READY'; st.className = 'mic-status ok';
     btn.textContent = '🎤 MIC ON';
     btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
-    // Restore music fully
-    ['A','B'].forEach(function(id){ if(broadcastChains[id]) broadcastChains[id].updateDucking(false); });
-    hardResetMicDuck();
+    // Restore music after mic has fully ramped down — small delay avoids abrupt jump
+    setTimeout(function() {
+      ['A','B'].forEach(function(id){ if(broadcastChains[id]) broadcastChains[id].updateDucking(false); });
+      hardResetMicDuck();
+    }, 120);
   }
 }
 // ─────────────────────────────────────────────────────────────────────────────
