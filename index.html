@@ -2394,10 +2394,22 @@ function restoreFromAd() {
 ge('volA').addEventListener('input', function() {
   setSlider('volA', 'volAd', pct);
   decks.A.audio.volume = +this.value;
+  // Sync console fader
+  var v = +this.value;
+  ge('deckASlider').value = v;
+  ge('deckASliderD').textContent = Math.round(v * 100) + '%';
+  window._deckAFader = v;
+  applyConsoleMix();
 });
 ge('volB').addEventListener('input', function() {
   setSlider('volB', 'volBd', pct);
   decks.B.audio.volume = +this.value;
+  // Sync console fader
+  var v = +this.value;
+  ge('deckBSlider').value = v;
+  ge('deckBSliderD').textContent = Math.round(v * 100) + '%';
+  window._deckBFader = v;
+  applyConsoleMix();
 });
 ge('rateA').addEventListener('input', function() {
   setSlider('rateA', 'rateAd', function(v) { return v.toFixed(2) + 'x'; });
@@ -2424,21 +2436,27 @@ ge('micVol').addEventListener('input', function() {
 //  Each slider connects directly to the relevant Web Audio gain node
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ── Deck A fader → xfGainA (pre-crossfader trim) ─────────────────────────────
+// ── Deck A fader → xfGainA + sync volA slider ────────────────────────────────
 ge('deckASlider').addEventListener('input', function() {
   var v = parseFloat(this.value);
   ge('deckASliderD').textContent = Math.round(v * 100) + '%';
-  // xfGainA holds the crossfader position — we scale it by the fader level
-  // Store deck fader value and re-apply crossfader so both interact correctly
   window._deckAFader = v;
+  // Sync back to deck A volume slider
+  ge('volA').value = v;
+  setSlider('volA', 'volAd', pct);
+  if (decks && decks.A && decks.A.audio) decks.A.audio.volume = v;
   applyConsoleMix();
 });
 
-// ── Deck B fader → xfGainB ───────────────────────────────────────────────────
+// ── Deck B fader → xfGainB + sync volB slider ────────────────────────────────
 ge('deckBSlider').addEventListener('input', function() {
   var v = parseFloat(this.value);
   ge('deckBSliderD').textContent = Math.round(v * 100) + '%';
   window._deckBFader = v;
+  // Sync back to deck B volume slider
+  ge('volB').value = v;
+  setSlider('volB', 'volBd', pct);
+  if (decks && decks.B && decks.B.audio) decks.B.audio.volume = v;
   applyConsoleMix();
 });
 
@@ -2452,13 +2470,17 @@ ge('micSlider').addEventListener('input', function() {
   setSlider('micVol', 'micVold', pct);
 });
 
-// ── Cart fader → jingleDuckGain base level (scales cart/jingle volume) ────────
+// ── Cart fader → all cart audio elements (live + queued) ─────────────────────
 ge('cartSlider').addEventListener('input', function() {
   var v = parseFloat(this.value);
   ge('cartSliderD').textContent = Math.round(v * 100) + '%';
   window._cartFaderLevel = v;
-  // Apply to all live cart audio elements
-  cartAudios.forEach(function(a) { if (a && !a.paused) a.volume = v; });
+  // Apply to ALL cart audio elements (not just playing ones)
+  cartAudios.forEach(function(a) { if (a) a.volume = v; });
+  // Also apply to jingleDuckGain if available
+  if (typeof jingleDuckGain !== 'undefined' && jingleDuckGain) {
+    jingleDuckGain.gain.setTargetAtTime(v, ACX ? ACX.currentTime : 0, 0.05);
+  }
 });
 
 // ── Master fader → masterGain node ───────────────────────────────────────────
@@ -2530,19 +2552,7 @@ function applyConsoleMix() {
   xfGainB.gain.setTargetAtTime(gB, ACX.currentTime, 0.05);
 }
 
-// ── Keep studio deck vol sliders in sync with console ─────────────────────────
-ge('volA').addEventListener('input', function() {
-  var v = +this.value;
-  ge('deckASlider').value = v;
-  ge('deckASliderD').textContent = Math.round(v * 100) + '%';
-  window._deckAFader = v;
-});
-ge('volB').addEventListener('input', function() {
-  var v = +this.value;
-  ge('deckBSlider').value = v;
-  ge('deckBSliderD').textContent = Math.round(v * 100) + '%';
-  window._deckBFader = v;
-});
+// ── masterVol and micVol → console sliders (bidirectional) ───────────────────
 ge('masterVol').addEventListener('input', function() {
   ge('masterSlider').value = this.value;
   ge('masterSliderD').textContent = Math.round(+this.value * 100) + '%';
@@ -3539,18 +3549,20 @@ loop();
 </div>
 
 <script>
-// ── PWA: Inline Manifest (works on any host — GitHub Pages, Vercel, Netlify) ──
+// ── PWA: Inline Manifest via data URI (Android-safe — no blob: URLs) ──
+// blob: URLs are NOT supported for manifests on Android Chrome / WebAPK.
+// data: URIs work correctly and survive the install → launch cycle.
 (function() {
   var manifest = {
     name: 'Eyethu Pro Radio Studio',
     short_name: 'Eyethu Radio',
     description: 'Professional broadcast radio studio — decks, mixer, cartwall, auto-DJ, mic and DSP.',
-    start_url: './',
+    start_url: '/',
     display: 'standalone',
     orientation: 'landscape',
     background_color: '#07090a',
     theme_color: '#0f2d3d',
-    scope: './',
+    scope: '/',
     lang: 'en',
     id: 'eyethu-pro-radio-studio',
     categories: ['music', 'entertainment', 'productivity'],
@@ -3563,20 +3575,21 @@ loop();
       { src: ICON_32,  sizes: '32x32',     type: 'image/png', purpose: 'any' }
     ]
   };
-  var blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-  var url  = URL.createObjectURL(blob);
-  document.getElementById('manifestLink').setAttribute('href', url);
+  // Use data: URI instead of blob: — Android WebAPK requires a stable, re-readable URL
+  var dataUrl = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
+  document.getElementById('manifestLink').setAttribute('href', dataUrl);
 })();
 
-// ── PWA: Inline Service Worker (no external sw.js needed) ─────────────────────
-// Works on GitHub Pages, Vercel, Netlify — no separate sw.js file required
-// SW only works on https:// or http://localhost — skip silently on file://
+// ── PWA: Inline Service Worker via data URI (Android-safe) ─────────────────
+// CRITICAL: Android Chrome refuses to register SWs from blob: URLs.
+// Using a data: URI instead ensures the SW registers correctly and the
+// installed PWA icon launches the app without crashing.
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   window.addEventListener('load', function() {
     var swCode = [
       '"use strict";',
-      'var CACHE = "eyethu-radio-v3";',
-      'var SELF_URL = self.location.href;',
+      'var CACHE = "eyethu-radio-v4";',
+      'var SELF_URL = "/";',
       // Install: cache the page itself for offline
       'self.addEventListener("install", function(e) {',
       '  self.skipWaiting();',
@@ -3594,11 +3607,10 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       '    }).then(function(){ return self.clients.claim(); })',
       '  );',
       '});',
-      // Fetch: serve from cache first for same-origin, network-first for others
+      // Fetch: serve from cache, fall back to network
       'self.addEventListener("fetch", function(e) {',
       '  if (e.request.method !== "GET") return;',
       '  var url = e.request.url;',
-      '  // Network-first for fonts/CDN; cache-first for our own page',
       '  if (url.startsWith(self.location.origin)) {',
       '    e.respondWith(',
       '      caches.open(CACHE).then(function(c) {',
@@ -3615,9 +3627,9 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       '  }',
       '});'
     ].join('\n');
-    var swBlob = new Blob([swCode], { type: 'application/javascript' });
-    var swUrl  = URL.createObjectURL(swBlob);
-    navigator.serviceWorker.register(swUrl, { scope: './' })
+    // Use data: URI — blob: URIs are blocked for SW registration on Android Chrome
+    var swUrl = 'data:application/javascript;charset=utf-8,' + encodeURIComponent(swCode);
+    navigator.serviceWorker.register(swUrl, { scope: '/' })
       .then(function(reg) { console.log('[SW] Registered, scope:', reg.scope); })
       .catch(function(err) { console.warn('[SW] Registration failed:', err); });
   });
